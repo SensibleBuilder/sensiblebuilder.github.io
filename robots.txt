@@ -1,4 +1,0 @@
-User-agent: *
-Disallow:
-
-Sitemap: https://www.sensiblebuilder.com/sitemap-index.xml
