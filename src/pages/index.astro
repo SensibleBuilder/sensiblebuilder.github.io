@@ -1,60 +1,130 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 
-import Hero from '~/components/widgets/Hero.astro';
-import Note from '~/components/widgets/Note.astro';
-import Features from '~/components/widgets/Features.astro';
+import Carousel from '~/components/widgets/Carousel.svelte';
 import Features2 from '~/components/widgets/Features2.astro';
-import Steps from '~/components/widgets/Steps.astro';
-import Content from '~/components/widgets/Content.astro';
-import BlogLatestPosts from '~/components/widgets/BlogLatestPosts.astro';
-import FAQs from '~/components/widgets/FAQs.astro';
-import Stats from '~/components/widgets/Stats.astro';
-import CallToAction from '~/components/widgets/CallToAction.astro';
+import Headline from '~/components/blog/Headline.astro';
+import Hero2 from '~/components/widgets/Hero2.astro';
+import Note from '~/components/widgets/Note.astro';
+import Steps2 from '~/components/widgets/Steps2.astro';
+import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
+
+import { Image } from 'astro:assets';
+import carouselImage1 from '~/assets/images/TopBanner_Bellevue_Kitchen.jpg';
+import carouselImage2 from '~/assets/images/TopBanner_Seattle_Kitchen.jpg';
+import carouselImage3 from '~/assets/images/TopBanner_Seattle_MB.jpg';
+
 
 const metadata = {
-  title: 'AstroWind — Free template for creating websites with Astro + Tailwind CSS',
-  ignoreTitleTemplate: true,
+  title: 'Sensible Builder - Custom Homes, Additions, Renovations',
+  ignoreTitleTemplate: true,  
 };
 ---
 
 <Layout metadata={metadata}>
   <!-- Hero Widget ******************* -->
 
-  <Hero
+  <Hero2
     actions={[
       {
         variant: 'primary',
-        text: 'Get template',
-        href: 'https://github.com/onwidget/astrowind',
-        target: '_blank',
-        icon: 'tabler:download',
-      },
-      { text: 'Learn more', href: '#features' },
+        text: 'Get your quote today',
+        href: '#contact',
+        icon: 'tabler:phone',
+      }
     ]}
-    image={{ src: '~/assets/images/hero-image.png', alt: 'AstroWind Hero Image' }}
+    image={{ src: '~/assets/images/WH-Seattle-Patio.jpg', alt: 'A beautiful covered patio with stone tile floor.  ' }}
   >
+
     <Fragment slot="title">
-      Free template for <span class="hidden xl:inline">creating websites with</span>
-      <span class="text-accent dark:text-white"> Astro 5.0</span> + Tailwind CSS
+      <span class="inline">Looking for a</span>
+      <span class="block">
+        <span class="text-accent dark:text-indigo-400"> Custom Home</span>?
+      </span>
     </Fragment>
 
     <Fragment slot="subtitle">
-      <span class="hidden sm:inline">
-        <span class="font-semibold">AstroWind</span> is a free, customizable and production-ready template for Astro 5.0
-        + Tailwind CSS.</span
-      >
-      <span class="block mb-1 sm:hidden font-bold text-blue-600">AstroWind: Production-ready.</span>
-      Suitable for Startups, Small Business, SaaS websites, Professional Portfolios, Marketing websites, Landing Pages &
-      Blogs.
+      <span class="font-semibold block">Your dream home doesn't have to stay a dream.</span>  
+      <span class="mb-1 hidden sm:inline"> With over 20 years of experience and dozens of happy clients, we're right at home with our network of architects and suppliers.</span>
     </Fragment>
-  </Hero>
 
+  </Hero2>
+  
   <!-- Note Widget ******************* -->
 
-  <Note title="Philosophy:" description="Simplicity, Best Practices and High Performance" />
+  <Note title="Where We Work:" description="We operate in the Greater Seattle WA area, including Bothell, Bellevue, and more." />
+  
+  <!-- Gallery -->
+  <WidgetWrapper id="gallery" containerClass="relative max-w-full inline-block">
+    <Headline title={"Your Vision is Our Reality"} subtitle={"Our services cover everything from custom homes to remodels and additions."}/>
+    <Carousel client:load>
+      <swiper-slide>
+        <Image src={carouselImage1} alt="Sensible Builder logo."></Image>
+      </swiper-slide>
+      <swiper-slide>
+        <Image src={carouselImage2} alt="Sensible Builder logo."></Image>
+      </swiper-slide>
+      <swiper-slide>
+        <Image src={carouselImage3} alt="Sensible Builder logo."></Image>
+      </swiper-slide>
+    </Carousel>
+  </WidgetWrapper>
 
-  <!-- Features Widget *************** -->
+  <!-- About Us -->
+
+  <Steps2
+    title="Our values"
+    subtitle="As homeowners, we understand that contracting is a huge and potentially frustrating endeavour. That's why we work closely with our clients to ensure that homes are designed with the utmost care."
+    items={[
+      {
+        title: 'Customer-centric Process',
+        description:
+          'We pride ourselves on communication, fast response times, and in-depth discussions to keep you in the loop. Letting your voice be heard is our top priority.',
+        icon: 'tabler:users'
+      },
+      {
+        title: 'Holistic Design',
+        description:
+          'Our approach to designing houses takes into consideration a wide variety of factors, from eco-friendliness and material efficiency to interior and psychological design.',
+        icon: 'tabler:home'
+      },
+      {
+        title: 'Passion',
+        description:
+          'Every project we take is more than just a house to us. We know how important homes are to everyone, whether for yourself or for your family.',
+        icon: 'tabler:heart'
+      },
+    ]}
+    id="about"
+  />
+
+  <!-- Contact -->
+
+  <Features2
+    title="Contact Us"
+    subtitle='Call now for a free consultation - leave us a message and we will get back to you as soon as possible.'
+    isAfterContent={true}
+    items={[
+      {
+        title: 'Phone',
+        description: '+1 (206) 694-3882',
+        icon: 'tabler:headset',
+      },
+      {
+        title: 'Email',
+        description: 'jerry@sensiblebuilder.com',
+        icon: 'tabler:mail',
+      },
+      {
+        title: 'WeChat',
+        description: '@jhz5947',
+        icon: 'tabler:brand-wechat'
+      }
+    ]}
+    id="contact"
+  />
+
+  <!-- Features Widget *************** 
 
   <Features
     id="features"
@@ -101,7 +171,7 @@ const metadata = {
     ]}
   />
 
-  <!-- Content Widget **************** -->
+   Content Widget ****************
 
   <Content
     isReversed
@@ -139,7 +209,7 @@ const metadata = {
     </Fragment>
   </Content>
 
-  <!-- Content Widget **************** -->
+  Content Widget **************** 
 
   <Content
     isAfterContent
@@ -176,7 +246,7 @@ const metadata = {
     </Fragment>
   </Content>
 
-  <!-- Content Widget **************** -->
+   Content Widget **************** 
 
   <Content
     isReversed
@@ -214,7 +284,7 @@ const metadata = {
     </Fragment>
   </Content>
 
-  <!-- Steps Widget ****************** -->
+  Steps Widget ******************
 
   <Steps
     title="Get your dream website up and running in no time with AstroWind."
@@ -248,7 +318,7 @@ const metadata = {
     }}
   />
 
-  <!-- Features2 Widget ************** -->
+  Features2 Widget **************
 
   <Features2
     title="Most used widgets"
@@ -312,7 +382,7 @@ const metadata = {
     </Fragment>
   </Features2>
 
-  <!-- HighlightedPosts Widget ******* -->
+  HighlightedPosts Widget ******* 
 
   <BlogLatestPosts
     title="Find out more content in our Blog"
@@ -322,7 +392,7 @@ const metadata = {
                 `}
   />
 
-  <!-- FAQs Widget ******************* -->
+  FAQs Widget ******************* 
 
   <FAQs
     title="Frequently Asked Questions"
@@ -363,7 +433,7 @@ const metadata = {
     ]}
   />
 
-  <!-- Stats Widget ****************** -->
+  Stats Widget ****************** 
 
   <Stats
     stats={[
@@ -374,7 +444,7 @@ const metadata = {
     ]}
   />
 
-  <!-- CallToAction Widget *********** -->
+  CallToAction Widget *********** 
 
   <CallToAction
     actions={[
@@ -395,5 +465,5 @@ const metadata = {
       Be very surprised by these huge fake numbers you are seeing on this page. <br class="hidden md:inline" />Don't
       waste more time! :P
     </Fragment>
-  </CallToAction>
+  </CallToAction> -->
 </Layout>
