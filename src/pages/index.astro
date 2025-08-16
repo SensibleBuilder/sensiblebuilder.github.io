@@ -1,6 +1,7 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 
+import AtroposComponent from '~/components/ui/AtroposComponent.svelte';
 import Carousel from '~/components/widgets/Carousel.svelte';
 import Features2 from '~/components/widgets/Features2.astro';
 import Headline from '~/components/blog/Headline.astro';
@@ -19,6 +20,7 @@ const metadata = {
   title: 'Sensible Builder - Custom Homes, Additions, Renovations',
   ignoreTitleTemplate: true,  
 };
+
 ---
 
 <Layout metadata={metadata}>
@@ -53,21 +55,25 @@ const metadata = {
   <!-- Note Widget ******************* -->
 
   <Note title="Where We Work:" description="We operate in the Greater Seattle WA area, including Bothell, Bellevue, and more." />
-  
+
   <!-- Gallery -->
-  <WidgetWrapper id="gallery" containerClass="relative max-w-full inline-block">
+  <WidgetWrapper id="gallery" containerClass="relative inline-block max-w-full">
     <Headline title={"Your Vision is Our Reality"} subtitle={"Our services cover everything from custom homes to remodels and additions."}/>
-    <Carousel client:load>
-      <swiper-slide>
-        <Image src={carouselImage1} alt="Sensible Builder logo."></Image>
-      </swiper-slide>
-      <swiper-slide>
-        <Image src={carouselImage2} alt="Sensible Builder logo."></Image>
-      </swiper-slide>
-      <swiper-slide>
-        <Image src={carouselImage3} alt="Sensible Builder logo."></Image>
-      </swiper-slide>
-    </Carousel>
+    <div class="lg:w-5/6 mx-auto  ">
+      <AtroposComponent client:load>
+        <Carousel client:load>
+          <swiper-slide>
+            <Image src={carouselImage1} alt="Sensible Builder logo." />
+          </swiper-slide>
+          <swiper-slide>
+            <Image src={carouselImage2} alt="Sensible Builder logo." />
+          </swiper-slide>
+          <swiper-slide>
+            <Image src={carouselImage3} alt="Sensible Builder logo." />
+          </swiper-slide>
+        </Carousel>
+      </AtroposComponent>
+    </div>
   </WidgetWrapper>
 
   <!-- About Us -->
