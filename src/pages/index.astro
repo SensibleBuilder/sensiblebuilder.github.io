@@ -4,8 +4,6 @@ import Layout from '~/layouts/PageLayout.astro';
 import AtroposComponent from '~/components/ui/AtroposComponent.svelte';
 import Carousel from '~/components/widgets/Carousel.svelte';
 
-import ContactUs from '~/components/widgets/Contact.astro';
-import Features2 from '~/components/widgets/Features2.astro';
 import Headline from '~/components/blog/Headline.astro';
 import Hero2 from '~/components/widgets/Hero2.astro';
 import Note from '~/components/widgets/Note.astro';
@@ -17,6 +15,10 @@ import carouselImage1 from '~/assets/images/TopBanner_Bellevue_Kitchen.jpg';
 import carouselImage2 from '~/assets/images/TopBanner_Seattle_Kitchen.jpg';
 import carouselImage3 from '~/assets/images/TopBanner_Seattle_MB.jpg';
 
+import galleryImg1 from '~/assets/images/WholeHouse/Bellevue/WH_Bellevue_Front.jpg';
+import galleryImg2 from '~/assets/images/WholeHouse/Bellevue/WH_Bellevue_Kitchen.jpg';
+import galleryImg3 from '~/assets/images/WholeHouse/Bellevue/WH_Bellevue_MB.jpg';
+import galleryImg4 from '~/assets/images/WholeHouse/Bellevue/WH_Bellevue_Stair.jpg';
 
 const metadata = {
   title: 'Sensible Builder - Custom Homes, Additions, Renovations',
@@ -59,7 +61,7 @@ const metadata = {
   <Note title="Where We Work:" description="We operate in the Greater Seattle WA area, including Bothell, Bellevue, and more." />
 
   <!-- Gallery -->
-  <WidgetWrapper id="gallery" containerClass="relative inline-block max-w-full">
+  <WidgetWrapper containerClass="relative inline-block max-w-full">
     <Headline title={"Your Vision is Our Reality"} subtitle={"Our services cover everything from custom homes to remodels and additions."}/>
     <div class="lg:w-5/6 mx-auto  ">
       <AtroposComponent client:load>
@@ -76,6 +78,19 @@ const metadata = {
         </Carousel>
       </AtroposComponent>
     </div>
+  </WidgetWrapper>
+
+  <Headline title="Hello, World!" />
+
+  <!-- Gallery -->
+
+    <WidgetWrapper>
+      <div id="gallery" class="mx-auto grid flex-row grid-cols-2 gap-8">
+        <Image src={galleryImg1} alt="Sensible Builder logo." />
+        <Image src={galleryImg2} alt="Sensible Builder logo." />
+        <Image src={galleryImg3} alt="Sensible Builder logo." />
+        <Image src={galleryImg4} alt="Sensible Builder logo." />
+      </div>
   </WidgetWrapper>
 
   <!-- About Us -->
@@ -106,7 +121,7 @@ const metadata = {
     id="about"
   />
 
-  <!-- Contact -->
+  <!-- Contact 
 
   <Features2
     title="Contact Us"
@@ -140,7 +155,7 @@ const metadata = {
       {
         type: 'hidden',
         name: 'access_key',
-        value: '7226230d-95e6-4189-9400-03edd827c421', // jerry@sensiblebuilder.com
+        value: '5038e0b2-0a2b-460c-aac6-4c7b03b6b16c', // jerry@sensiblebuilder.com
       },
       {
         type: 'text',
@@ -161,12 +176,12 @@ const metadata = {
     }}
     disclaimer={{
       label:
-        'By submitting this contact form, you acknowledge and agree to the collection of your personal information.',
+        'I acknowledge and agree to the Privacy Policy.',
     }}
     description="Responses are usually expected within 12 business hours."
   />
 
-  <!-- Features Widget *************** 
+  <!- Features Widget 
 
   <Features
     id="features"
@@ -213,7 +228,7 @@ const metadata = {
     ]}
   />
 
-   Content Widget ****************
+  <!- Content Widget 
 
   <Content
     isReversed
@@ -251,7 +266,7 @@ const metadata = {
     </Fragment>
   </Content>
 
-  Content Widget **************** 
+  <!-- Content Widget **************** 
 
   <Content
     isAfterContent
