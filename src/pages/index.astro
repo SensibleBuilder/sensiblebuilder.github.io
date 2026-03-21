@@ -3,6 +3,8 @@ import Layout from '~/layouts/PageLayout.astro';
 
 import AtroposComponent from '~/components/ui/AtroposComponent.svelte';
 import Carousel from '~/components/widgets/Carousel.svelte';
+
+import ContactUs from '~/components/widgets/Contact.astro';
 import Features2 from '~/components/widgets/Features2.astro';
 import Headline from '~/components/blog/Headline.astro';
 import Hero2 from '~/components/widgets/Hero2.astro';
@@ -128,6 +130,40 @@ const metadata = {
       }
     ]}
     id="contact"
+  />
+
+  <ContactUs
+    id="form"
+    title="Or drop us a message today!"
+    subtitle="For quicker answers, please feel free to call the number above."
+    inputs={[
+      {
+        type: 'hidden',
+        name: 'access_key',
+        value: '7226230d-95e6-4189-9400-03edd827c421', // jerry@sensiblebuilder.com
+      },
+      {
+        type: 'text',
+        name: 'name',
+        label: 'Name',
+        required: true,
+      },
+      {
+        type: 'email',
+        name: 'email',
+        label: 'Email',
+        required: true,
+      },
+    ]}
+    textarea={{
+      label: 'Message',
+      required: true,
+    }}
+    disclaimer={{
+      label:
+        'By submitting this contact form, you acknowledge and agree to the collection of your personal information.',
+    }}
+    description="Responses are usually expected within 12 business hours."
   />
 
   <!-- Features Widget *************** 
