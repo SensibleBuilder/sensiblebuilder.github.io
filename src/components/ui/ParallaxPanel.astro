@@ -1,0 +1,109 @@
+---
+interface Props {
+  speed?: number;
+  className?: string;
+  id?: string;
+  pin?: boolean;
+  lockDistance?: number;
+}
+
+const { speed = 0.12, className = '', id, pin = true, lockDistance = 0.42 } = Astro.props;
+---
+
+<section
+  class:list={['sb-parallax-panel', className]}
+  data-panel-speed={speed}
+  data-panel-pin={pin ? 'true' : 'false'}
+  data-panel-lock={lockDistance}
+  {...(id ? { id } : {})}
+>
+  <div class="sb-parallax-panel__inner">
+    <slot />
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const initParallaxPanels = () => {
+    if (typeof window === 'undefined') return;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelectorAll('.sb-parallax-panel').forEach((panel) => {
+      if (panel.dataset.parallaxReady === 'true') return;
+      panel.dataset.parallaxReady = 'true';
+
+      const inner = panel.querySelector('.sb-parallax-panel__inner');
+      if (!inner) return;
+
+      const speed = Number(panel.dataset.panelSpeed ?? '0.12');
+      const shouldPin = panel.dataset.panelPin === 'true';
+      const lockDistance = Number(panel.dataset.panelLock ?? '0.42');
+
+      if (shouldPin) {
+        ScrollTrigger.create({
+          trigger: panel,
+          start: 'top top',
+          end: () => `+=${Math.max(window.innerHeight * lockDistance, 220)}`,
+          pin: true,
+          pinSpacing: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        });
+      }
+
+      if (reducedMotion) return;
+
+      gsap.fromTo(
+        inner,
+        {
+          opacity: 0,
+          y: 48,
+          clipPath: 'inset(8% 0% 8% 0% round 24px)',
+        },
+        {
+          opacity: 1,
+          y: 0,
+          clipPath: 'inset(0% 0% 0% 0% round 0px)',
+          ease: 'power2.out',
+          duration: 1.2,
+          scrollTrigger: {
+            trigger: panel,
+            start: shouldPin ? 'top 96%' : 'top 86%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
+
+      gsap.to(inner, {
+        y: () => window.innerHeight * speed,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: panel,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: true,
+        },
+      });
+    });
+  };
+
+  if (typeof window !== 'undefined') {
+    initParallaxPanels();
+    document.addEventListener('astro:page-load', initParallaxPanels);
+  }
+</script>
+
+<style>
+  .sb-parallax-panel {
+    opacity: 1;
+    will-change: transform;
+  }
+
+  .sb-parallax-panel__inner {
+    will-change: transform;
+  }
+</style>
