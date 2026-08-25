@@ -4,7 +4,9 @@ import Layout from '~/layouts/PageLayout.astro';
 import AtroposComponent from '~/components/ui/AtroposComponent.svelte';
 import Carousel from '~/components/widgets/Carousel.svelte';
 
+import ContactUs from '~/components/widgets/Contact.astro';
 import Hero2 from '~/components/widgets/Hero2.astro';
+import Masonry from '~/components/ui/Masonry.astro';
 import ModelViewport3D from '~/components/widgets/ModelViewport3D.astro';
 import Note from '~/components/widgets/Note.astro';
 import ParallaxMasonryHorizontal from '~/components/widgets/ParallaxMasonryHorizontal.astro';
@@ -48,42 +50,38 @@ const masonryItems = [
 ---
 
 <Layout metadata={metadata}>
-  <ParallaxPanel speed={0.05}>
-    <Hero2
-      actions={[
-        {
-          variant: 'primary',
-          text: 'Get your quote today',
-          href: '#contact',
-          icon: 'tabler:phone',
-        },
-      ]}
-      image={{ src: '~/assets/images/WH-Seattle-Patio.jpg', alt: 'A beautiful covered patio with stone tile floor.' }}
-    >
-      <Fragment slot="title">
-        <span data-gsap-text>
-          <span class="inline">Looking for a</span>
-          <span class="block">
-            <span class="js-title-keyword text-accent dark:text-indigo-400"> Custom Home</span>?
-          </span>
+  <Hero2
+    actions={[
+      {
+        variant: 'primary',
+        text: 'Get your quote today',
+        href: '#contact',
+        icon: 'tabler:phone',
+      },
+    ]}
+    image={{ src: '~/assets/images/WH-Seattle-Patio.jpg', alt: 'A beautiful covered patio with stone tile floor.' }}
+  >
+    <Fragment slot="title">
+      <span data-gsap-text>
+        <span class="inline">Looking for a</span>
+        <span class="block">
+          <span class="js-title-keyword text-accent dark:text-indigo-400"> Custom Home</span>?
         </span>
-      </Fragment>
+      </span>
+    </Fragment>
 
-      <Fragment slot="subtitle">
-        <span class="font-semibold block">Your dream home does not have to stay a dream.</span>
-        <span class="mb-1 hidden sm:inline">
-          With over 20 years of experience and dozens of happy clients, we are right at home with our network of architects
-          and suppliers.
-        </span>
-      </Fragment>
-    </Hero2>
-  </ParallaxPanel>
+    <Fragment slot="subtitle">
+      <span class="font-semibold block">Your dream home does not have to stay a dream.</span>
+      <span class="mb-1 hidden sm:inline">
+        With over 20 years of experience and hundreds of happy clients, we are right at home with our network of architects
+        and suppliers.
+      </span>
+    </Fragment>
+  </Hero2>
 
-  <ParallaxPanel speed={0.03}>
-    <Note title="Where We Work:" description="We operate in the Greater Seattle WA area, including Bothell, Bellevue, and more." />
-  </ParallaxPanel>
+  <Note  description="We operate in the <bold>Greater Seattle WA area</bold>, including Bothell, Bellevue, and more." />
 
-  <ParallaxPanel speed={0.09}>
+
     <WidgetWrapper containerClass="relative inline-block max-w-full">
       <header class="mb-8 md:mb-16 text-center max-w-3xl mx-auto">
         <h2 class="text-4xl md:text-5xl font-bold leading-tighter tracking-tighter font-heading" data-gsap-text>
@@ -111,19 +109,34 @@ const masonryItems = [
         </AtroposComponent>
       </div>
     </WidgetWrapper>
-  </ParallaxPanel>
 
-  <ParallaxPanel speed={0.15} pin={false}>
     <WidgetWrapper containerClass="max-w-full">
-      <ParallaxMasonryHorizontal
-        id="gallery"
-        subtitle="A cross-section of whole-house builds, additions, and remodels that move with depth as you scroll."
-        items={masonryItems}
-      />
+      <Masonry
+        breakpointCols={{
+          default: 3,
+          1200: 3,
+          700: 2,
+        }}
+        class="flex gap-4 px-4"
+        columnClass=""
+      >
+        {
+          masonryItems.map((item, index) => (
+            <figure class:list={['sb-masonry-card', `sb-span-${item.span}`]} data-speed={item.speed}>
+              <Image
+                src={item.src}
+                alt={item.alt}
+                class="sb-masonry-image"
+                widths={[400, 640, 960, 1200]}
+                sizes="(max-width: 768px) 75vw, 22vw"
+                loading={index < 3 ? 'eager' : 'lazy'}
+              />
+            </figure>
+          ))
+        }
+      </Masonry>
     </WidgetWrapper>
-  </ParallaxPanel>
 
-  <ParallaxPanel speed={0.07}>
     <Steps2
       title="Our <span class='js-title-keyword'>values</span>"
       subtitle="As homeowners, we understand that contracting is a huge and potentially frustrating endeavor. That is why we work closely with our clients to ensure that homes are designed with the utmost care."
@@ -149,16 +162,42 @@ const masonryItems = [
       ]}
       id="about"
     />
-  </ParallaxPanel>
+  <ContactUs
+    id="contact"
+    title="Contact Us"
+    subtitle="Drop us a message today and we'll get you started!"
+    inputs={[
+      {
+        type: 'hidden',
+        name: 'access_key',
+        value: '7226230d-95e6-4189-9400-03edd827c421', // jerry@sensiblebuilder.com
+      },
+      {
+        type: 'text',
+        name: 'name',
+        label: 'Name',
+        required: true,
+      },
+      {
+        type: 'email',
+        name: 'email',
+        label: 'Email',
+        required: false,
+      },
+      {
+        type: 'tel',
+        name: 'phone',
+        label: 'Phone',
+        required: false,
+      },
+    ]}
+    textarea={{
+      label: 'Message',
+      required: true,
+    }}
+    description="Responses are usually expected within 12 business hours."
+  />
 
-  <ParallaxPanel speed={0.11}>
-    <WidgetWrapper containerClass="max-w-full">
-      <ModelViewport3D
-        id="model-lab"
-        subtitle="Drop in your own GLB and shader logic to turn this section into a production-ready design preview tool."
-      />
-    </WidgetWrapper>
-  </ParallaxPanel>
 </Layout>
 
 <script>
@@ -229,5 +268,11 @@ const masonryItems = [
 
   :global(.js-title-keyword) {
     will-change: transform, filter;
+  }
+  .sb-masonry-card {
+    will-change: transform, opacity;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
   }
 </style>
