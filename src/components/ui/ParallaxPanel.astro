@@ -1,24 +1,132 @@
 ---
 interface Props {
-  speed?: number;
-  className?: string;
   id?: string;
+  class?: string;
+  className?: string;
+
+  /**
+   * Length of the sticky zone, in vh.
+   * Example: 200 means the panel stays sticky for 200vh of scrolling.
+   */
+  stickyDistanceVh?: number;
+
+  /**
+   * Where the content should land at the end of the sticky zone,
+   * measured from the top of the viewport in vh.
+   *
+   * 0 = content top reaches the top of the viewport.
+   */
+  topBoundaryVh?: number;
+
+  /**
+   * Optional explicit upward drift in vh.
+   *
+   * If omitted, drift is calculated automatically from:
+   * centered position -> topBoundaryVh
+   *
+   * Set to 0 to disable automatic drift.
+   */
+  driftVh?: number;
+
+  /**
+   * Initial downward offset used while the panel settles into center.
+   */
+  enterOffsetVh?: number;
+
+  /**
+   * Enables the enter animation.
+   */
+  animateIn?: boolean;
+
+  /**
+   * Legacy props.
+   */
   pin?: boolean;
   lockDistance?: number;
+  speed?: number;
 }
 
-const { speed = 0.12, className = '', id, pin = true, lockDistance = 0.42 } = Astro.props;
+const {
+  id,
+  class: classAttr,
+  className = '',
+  stickyDistanceVh,
+  topBoundaryVh = 0,
+  driftVh,
+  enterOffsetVh = 10,
+  animateIn = true,
+
+  // Legacy
+  pin = true,
+  lockDistance,
+  speed,
+} = Astro.props;
+
+const clampNumber = (
+  value: number,
+  min = 0,
+  max = Number.POSITIVE_INFINITY
+) => {
+  const safe = Number.isFinite(value) ? value : min;
+  return Math.min(max, Math.max(min, safe));
+};
+
+/**
+ * Backwards compatibility:
+ *
+ * Old:
+ *   pin={true}
+ *   lockDistance={0.42}
+ *
+ * New:
+ *   stickyDistanceVh={42}
+ */
+const resolvedStickyDistanceVh = clampNumber(
+  stickyDistanceVh ??
+    (pin ? (typeof lockDistance === 'number' ? lockDistance * 100 : 180) : 0),
+  0
+);
+
+const resolvedTopBoundaryVh = clampNumber(topBoundaryVh, 0, 100);
+const resolvedEnterOffsetVh = clampNumber(enterOffsetVh, 0);
+
+/**
+ * Old `speed` was a parallax multiplier.
+ * If someone explicitly passed speed, map it to a vh drift.
+ */
+const resolvedDriftVh =
+  driftVh ??
+  (typeof speed === 'number' && speed > 0 ? speed * 100 : undefined);
+
+const styleVars = [
+  `--sb-sticky-distance: ${resolvedStickyDistanceVh}vh`,
+  `--sb-top-boundary: ${resolvedTopBoundaryVh}vh`,
+  `--sb-enter-offset: ${resolvedEnterOffsetVh}vh`,
+  resolvedDriftVh !== undefined
+    ? `--sb-drift: ${clampNumber(resolvedDriftVh, 0)}vh`
+    : null,
+]
+  .filter((entry): entry is string => Boolean(entry))
+  .join('; ');
 ---
 
 <section
-  class:list={['sb-parallax-panel', className]}
-  data-panel-speed={speed}
-  data-panel-pin={pin ? 'true' : 'false'}
-  data-panel-lock={lockDistance}
-  {...(id ? { id } : {})}
+  class:list={['sb-sticky-panel', classAttr, className]}
+  style={styleVars}
+  data-sticky-panel
+  data-sticky-distance-vh={resolvedStickyDistanceVh}
+  data-top-boundary-vh={resolvedTopBoundaryVh}
+  data-enter-offset-vh={resolvedEnterOffsetVh}
+  data-animate-in={animateIn ? 'true' : 'false'}
+  {...(resolvedDriftVh !== undefined
+    ? { 'data-drift-vh': clampNumber(resolvedDriftVh, 0) }
+    : {})}
+  {...(id ? { id, 'data-panel-id': id } : {})}
 >
-  <div class="sb-parallax-panel__inner">
-    <slot />
+  <div class="sb-sticky-panel__viewport">
+    <div class="sb-sticky-panel__content">
+      <slot />
+    </div>
   </div>
 </section>
 
@@ -28,82 +136,403 @@ const { speed = 0.12, className = '', id, pin = true, lockDistance = 0.42 } = As
 
   gsap.registerPlugin(ScrollTrigger);
 
-  const initParallaxPanels = () => {
-    if (typeof window === 'undefined') return;
+  type ProgressDetail = {
+    /**
+     * Progress through the sticky zone.
+     * 0 = start of sticky zone
+     * 1 = end of sticky zone
+     */
+    progress: number;
 
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    document.querySelectorAll('.sb-parallax-panel').forEach((panel) => {
-      if (panel.dataset.parallaxReady === 'true') return;
-      panel.dataset.parallaxReady = 'true';
+    /**
+     * Percentage through the sticky zone.
+     * 0..100
+     */
+    percent: number;
 
-      const inner = panel.querySelector('.sb-parallax-panel__inner');
-      if (!inner) return;
+    /**
+     * The panel element.
+     */
+    panel: HTMLElement;
 
-      const speed = Number(panel.dataset.panelSpeed ?? '0.12');
-      const shouldPin = panel.dataset.panelPin === 'true';
-      const lockDistance = Number(panel.dataset.panelLock ?? '0.42');
-
-      if (shouldPin) {
-        ScrollTrigger.create({
-          trigger: panel,
-          start: 'top top',
-          end: () => `+=${Math.max(window.innerHeight * lockDistance, 220)}`,
-          pin: true,
-          pinSpacing: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        });
-      }
-
-      if (reducedMotion) return;
-
-      gsap.fromTo(
-        inner,
-        {
-          opacity: 0,
-          y: 48,
-          clipPath: 'inset(8% 0% 8% 0% round 24px)',
-        },
-        {
-          opacity: 1,
-          y: 0,
-          clipPath: 'inset(0% 0% 0% 0% round 0px)',
-          ease: 'power2.out',
-          duration: 1.2,
-          scrollTrigger: {
-            trigger: panel,
-            start: shouldPin ? 'top 96%' : 'top 86%',
-            toggleActions: 'play none none reverse',
-          },
-        }
-      );
-
-      gsap.to(inner, {
-        y: () => window.innerHeight * speed,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: panel,
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: true,
-        },
-      });
-    });
+    /**
+     * Optional panel id.
+     */
+    panelId?: string;
   };
 
-  if (typeof window !== 'undefined') {
-    initParallaxPanels();
-    document.addEventListener('astro:page-load', initParallaxPanels);
+  type ProgressCallback = (detail: ProgressDetail) => void;
+
+  const PANEL_SELECTOR = '.sb-sticky-panel';
+  const VIEWPORT_SELECTOR = '.sb-sticky-panel__viewport';
+  const CONTENT_SELECTOR = '.sb-sticky-panel__content';
+
+  type SbState = {
+    subscriptions: WeakMap<HTMLElement, Set<ProgressCallback>>;
+    lastProgress: WeakMap<HTMLElement, number>;
+    readyPanels: WeakSet<HTMLElement>;
+    cleanupFns: Array<() => void>;
+  };
+
+  const globalWindow = window as unknown as {
+    __sbStickyPanelState?: SbState;
+    __sbStickyPanelBound?: boolean;
+    SbStickyPanel?: {
+      subscribe: (
+        target: HTMLElement | null | undefined,
+        callback: ProgressCallback
+      ) => () => void;
+    };
+  };
+
+  if (!globalWindow.__sbStickyPanelState) {
+    globalWindow.__sbStickyPanelState = {
+      subscriptions: new WeakMap(),
+      lastProgress: new WeakMap(),
+      readyPanels: new WeakSet(),
+      cleanupFns: [],
+    };
+  }
+
+  const state = globalWindow.__sbStickyPanelState;
+
+  const vhToPx = (vh: number) => (window.innerHeight * vh) / 100;
+  const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
+
+  function closestPanel(
+    target: HTMLElement | null | undefined
+  ): HTMLElement | null {
+    return target?.closest?.(PANEL_SELECTOR) ?? null;
+  }
+
+  /**
+   * Public API.
+   *
+   * A wrapped component can call:
+   *
+   *   window.SbStickyPanel.subscribe(elementInsidePanel, ({ progress }) => {
+   *     // do something
+   *   });
+   */
+  function subscribe(
+    target: HTMLElement | null | undefined,
+    callback: ProgressCallback
+  ) {
+    const panel = closestPanel(target);
+    if (!panel) return () => {};
+
+    let callbacks = state.subscriptions.get(panel);
+
+    if (!callbacks) {
+      callbacks = new Set();
+      state.subscriptions.set(panel, callbacks);
+    }
+
+    callbacks.add(callback);
+
+    return () => {
+      callbacks?.delete(callback);
+
+      if (callbacks && callbacks.size === 0) {
+        state.subscriptions.delete(panel);
+      }
+    };
+  }
+
+  globalWindow.SbStickyPanel = {
+    subscribe,
+  };
+
+  function getTravel(
+    panel: HTMLElement,
+    viewport: HTMLElement,
+    content: HTMLElement
+  ): number {
+    /**
+     * If driftVh is explicitly provided, use it.
+     * This also allows driftVh={0} to disable automatic movement.
+     */
+    if (panel.hasAttribute('data-drift-vh')) {
+      const drift = Number(panel.dataset.driftVh ?? 0);
+      if (Number.isFinite(drift)) {
+        return vhToPx(drift);
+      }
+    }
+
+    const topBoundaryVh = Number(panel.dataset.topBoundaryVh ?? 0);
+    const boundary = Math.max(0, vhToPx(topBoundaryVh));
+
+    const viewportHeight = viewport.clientHeight || window.innerHeight;
+    const contentHeight = content.offsetHeight;
+
+    /**
+     * Content is centered inside the sticky viewport.
+     * This is the distance from the top of the viewport to the content top
+     * when the content is perfectly centered.
+     */
+    const centeredTop = Math.max(0, (viewportHeight - contentHeight) / 2);
+
+    /**
+     * Move upward from centered position until content top reaches boundary.
+     */
+    return Math.max(0, centeredTop - boundary);
+  }
+
+  function notify(panel: HTMLElement, rawProgress: number) {
+    const progress = clamp01(rawProgress);
+
+    if (state.lastProgress.get(panel) === progress) {
+      return;
+    }
+
+    state.lastProgress.set(panel, progress);
+
+    const detail: ProgressDetail = {
+      progress,
+      percent: progress * 100,
+      panel,
+      panelId: panel.dataset.panelId || panel.id || undefined,
+    };
+
+    /**
+     * CSS hooks:
+     *
+     * --sb-sticky-progress: 0..1
+     * --sb-sticky-percent: 0%..100%
+     */
+    panel.style.setProperty('--sb-sticky-progress', progress.toFixed(5));
+    panel.style.setProperty(
+      '--sb-sticky-percent',
+      `${(progress * 100).toFixed(2)}%`
+    );
+
+    /**
+     * DOM data hooks:
+     *
+     * data-progress="0.42"
+     * data-progress-percent="42.00"
+     */
+    panel.dataset.progress = progress.toFixed(4);
+    panel.dataset.progressPercent = (progress * 100).toFixed(2);
+
+    state.subscriptions.get(panel)?.forEach((callback) => {
+      try {
+        callback(detail);
+      } catch (error) {
+        console.error('[sb-sticky-panel] progress callback failed', error);
+      }
+    });
+
+    /**
+     * Event hooks.
+     *
+     * You can listen either on the panel itself:
+     *
+     *   panel.addEventListener('sb-sticky-progress', handler)
+     *
+     * Or globally:
+     *
+     *   window.addEventListener('sb-sticky-panel:progress', handler)
+     */
+    panel.dispatchEvent(new CustomEvent('sb-sticky-progress', { detail }));
+    window.dispatchEvent(
+      new CustomEvent('sb-sticky-panel:progress', { detail })
+    );
+  }
+
+  
+
+  function initPanel(panel: HTMLElement) {
+    if (state.readyPanels.has(panel)) return;
+
+    const viewport = panel.querySelector<HTMLElement>(VIEWPORT_SELECTOR);
+    const content = panel.querySelector<HTMLElement>(CONTENT_SELECTOR);
+
+    if (!viewport || !content) return;
+
+    state.readyPanels.add(panel);
+
+    const stickyDistanceVh = Number(panel.dataset.stickyDistanceVh ?? 0);
+    const enterOffsetVh = Number(panel.dataset.enterOffsetVh ?? 0);
+    const animateIn = panel.dataset.animateIn !== 'false';
+    const reducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
+
+    const cleanups: Array<() => void> = [];
+    let destroyed = false;
+
+    if (!animateIn || reducedMotion) {
+      gsap.set(content, { clearProps: 'opacity,transform' });
+    }
+
+    const vhToPx = (vh) => (window.innerHeight * vh) / 100;
+  
+  const stickyDistancePx = vhToPx(stickyDistanceVh);
+  const viewportHeight = window.innerHeight;
+  const totalDistancePx = viewportHeight + stickyDistancePx;
+  
+  // The exact progress point where entry ends and sticky begins
+  const phase1EndProgress = totalDistancePx > 0 ? viewportHeight / totalDistancePx : 1;
+
+  const applyState = (progress) => {
+    if (reducedMotion) {
+      gsap.set(content, { y: 0, opacity: 1 });
+      const stickyP = progress > phase1EndProgress ? (progress - phase1EndProgress) / (1 - phase1EndProgress) : 0;
+      notify(panel, stickyP);
+      return;
+    }
+
+    if (progress <= phase1EndProgress) {
+      // Phase 1: Entry (bottom of screen to top of screen)
+      const entryProgress = phase1EndProgress > 0 ? progress / phase1EndProgress : 1;
+      const startY = vhToPx(enterOffsetVh);
+      const currentY = startY * (1 - entryProgress);
+      
+      gsap.set(content, { y: currentY, opacity: entryProgress });
+      notify(panel, 0); // Sticky progress is 0 during entry
+    } else {
+      // Phase 2: Sticky (top of screen to bottom of screen)
+      const stickyProgress = (progress - phase1EndProgress) / (1 - phase1EndProgress);
+      const travel = getTravel(panel, viewport, content);
+      const currentY = -travel * stickyProgress;
+      
+      gsap.set(content, { y: currentY, opacity: 1 });
+      notify(panel, stickyProgress);
+    }
+  };
+
+  // Single Source of Truth for all movement
+  const mainTrigger = ScrollTrigger.create({
+    id: 'sb-sticky-panel-main',
+    trigger: panel,
+    start: 'top bottom',
+    end: 'bottom bottom',
+    invalidateOnRefresh: true,
+    onUpdate: (self) => applyState(self.progress)
+  });
+
+  requestAnimationFrame(() => {
+    if (!destroyed) applyState(mainTrigger.progress);
+  });
+
+    const destroy = () => {
+      destroyed = true;
+
+      cleanups.forEach((fn) => {
+        try {
+          fn();
+        } catch (error) {
+          console.error('[sb-sticky-panel] cleanup failed', error);
+        }
+      });
+
+      gsap.set(content, { clearProps: 'opacity,transform' });
+
+      panel.style.removeProperty('--sb-sticky-progress');
+      panel.style.removeProperty('--sb-sticky-percent');
+
+      panel.removeAttribute('data-progress');
+      panel.removeAttribute('data-progress-percent');
+
+      state.lastProgress.delete(panel);
+      state.readyPanels.delete(panel);
+    };
+
+    state.cleanupFns.push(destroy);
+  }
+
+  function initAll() {
+    document
+      .querySelectorAll<HTMLElement>(PANEL_SELECTOR)
+      .forEach(initPanel);
+
+    ScrollTrigger.refresh();
+  }
+
+  function cleanupAll() {
+    state.cleanupFns.splice(0).forEach((fn) => {
+      try {
+        fn();
+      } catch (error) {
+        console.error('[sb-sticky-panel] cleanup failed', error);
+      }
+    });
+
+    /**
+     * Safety net for Astro view transitions.
+     */
+    ScrollTrigger.getAll().forEach((trigger) => {
+      const id = (trigger as unknown as { id?: string }).id;
+
+      if (typeof id === 'string' && id.startsWith('sb-sticky-panel')) {
+        trigger.kill();
+      }
+    });
+  }
+
+  if (!globalWindow.__sbStickyPanelBound) {
+    globalWindow.__sbStickyPanelBound = true;
+
+    document.addEventListener('astro:before-swap', cleanupAll);
+    document.addEventListener('astro:page-load', initAll);
+
+    window.addEventListener('load', () => {
+      ScrollTrigger.refresh();
+    });
+
+    window.addEventListener('resize', () => {
+      ScrollTrigger.refresh();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAll, { once: true });
+  } else {
+    initAll();
   }
 </script>
 
 <style>
-  .sb-parallax-panel {
-    opacity: 1;
-    will-change: transform;
+  .sb-sticky-panel {
+    position: relative;
+
+    /*
+     * The extra height creates the sticky scroll runway.
+     */
+    height: calc(100vh + var(--sb-sticky-distance, 0vh));
   }
 
-  .sb-parallax-panel__inner {
+  @supports (height: 100svh) {
+    .sb-sticky-panel {
+      height: calc(100svh + var(--sb-sticky-distance, 0vh));
+    }
+  }
+
+    .sb-sticky-panel__viewport {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Removed overflow: hidden/clip to prevent Swiper clipping and lazy-load failures */
+  }
+
+  .sb-sticky-panel__content {
+    width: 100%;
+    max-width: 100%;
+    position: relative;
     will-change: transform;
+    backface-visibility: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sb-sticky-panel__content {
+      transform: none !important;
+      opacity: 1 !important;
+    }
   }
 </style>
