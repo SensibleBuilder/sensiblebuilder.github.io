@@ -102,16 +102,16 @@ const breakpointColsString =
   }
 
   class MasonryLayout {
-  container;
-  originalItems;
+  container: HTMLElement;
+  originalItems: Element[];
   defaultCols = 2;
-  sortByHeight;
-  breakpointCols;
-  columnCount;
-  resizeHandler;
-  debug;
+  sortByHeight: boolean;
+  breakpointCols: Record<string, number>;
+  columnCount: number;
+  resizeHandler: () => void;
+  debug: boolean;
 
-  constructor(container) {
+  constructor(container: HTMLElement) {
     this.container = container;
     this.originalItems = Array.from(container.children);
     this.defaultCols = 2;
@@ -121,13 +121,13 @@ const breakpointColsString =
     // Parse the `breakpointCols` from the dataset
     const breakpointColsAttr = container.dataset.breakpointCols;
     try {
-      const parsed = JSON.parse(breakpointColsAttr);
+      const parsed = JSON.parse(breakpointColsAttr ?? "");
       this.breakpointCols =
-        typeof parsed === "object"
+        typeof parsed === "object" && parsed !== null 
           ? parsed
           : { default: parseInt(parsed, 10) };
-    } catch (error) {
-      console.error("Invalid `breakpointCols` format:", breakpointColsAttr);
+    } catch (error: unknown) {
+      console.error("Invalid `breakpointCols` format:", (breakpointColsAttr ?? "") + error);
       this.breakpointCols = { default: this.defaultCols }; // Fallback
     }
 
@@ -145,11 +145,11 @@ const breakpointColsString =
 
   createLayout() {
     this.container.classList.remove("initialized");
-    const existingColumns = Array.from(
+    const existingColumns: Array<HTMLElement> = Array.from(
       this.container.querySelectorAll("[data-masonry-column]")
     );
 
-    let columns;
+    let columns: Array<HTMLElement> = [];
 
     // If column count hasn't changed, reuse existing columns
     if (existingColumns.length === this.columnCount) {
@@ -161,7 +161,7 @@ const breakpointColsString =
       this.container.innerHTML = "";
       columns = Array.from({ length: this.columnCount }, () => {
         const column = document.createElement("div");
-        column.className = this.container.dataset.columnClass;
+        column.className = this.container.dataset.columnClass ?? "";
         column.style.width = `${100 / this.columnCount}%`;
         column.setAttribute("data-masonry-column", "");
         this.container.appendChild(column);
@@ -171,7 +171,7 @@ const breakpointColsString =
 
     // Distribute items based on sortByHeight
     if (this.sortByHeight) {
-      this.originalItems.forEach((item) => {
+      this.originalItems.forEach((item: Element) => {
         const columnWithLeastHeight = columns.reduce((shortest, current) => {
           return current.offsetHeight < shortest.offsetHeight
             ? current
@@ -180,7 +180,7 @@ const breakpointColsString =
         columnWithLeastHeight.appendChild(item);
       });
     } else {
-      this.originalItems.forEach((item, index) => {
+      this.originalItems.forEach((item: Element, index: number) => {
         const columnIndex = index % this.columnCount;
         columns[columnIndex].appendChild(item);
       });
@@ -213,7 +213,7 @@ const breakpointColsString =
       return matchedBreakpoint;
     }
 
-    return this.breakpointCols.default || this.defaultCols;
+    return this.defaultCols;
   }
 
   handleResize() {
@@ -244,25 +244,28 @@ export function initializeMasonry() {
     });
 }
 
-export function throttle(func, limit) {
-  let lastFunc;
-  let lastRan;
-  return (...args) => {
+export function throttle<T extends (...args: never[]) => void>(
+  func: T,
+  limit: number
+): (...args: Parameters<T>) => void {
+  let lastFunc: ReturnType<typeof setTimeout> | undefined;
+  let lastRan: number | undefined;
+
+  return (...args: Parameters<T>) => {
     const now = Date.now();
     if (!lastRan) {
-      func.apply(this, args);
+      func(...args);
       lastRan = now;
     } else {
-      clearTimeout(lastFunc);
-      lastFunc = setTimeout(
-        () => {
-          if (now - lastRan >= limit) {
-            func.apply(this, args);
-            lastRan = now;
-          }
-        },
-        limit - (now - lastRan)
-      );
+      if (lastFunc) {
+        clearTimeout(lastFunc);
+      }
+      lastFunc = setTimeout(() => {
+        if (lastRan !== undefined && now - lastRan >= limit) {
+          func(...args);
+          lastRan = now;
+        }
+      }, limit - (now - lastRan));
     }
   };
 }

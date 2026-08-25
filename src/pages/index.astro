@@ -7,12 +7,11 @@ import Carousel from '~/components/widgets/Carousel.svelte';
 import ContactUs from '~/components/widgets/Contact.astro';
 import Hero2 from '~/components/widgets/Hero2.astro';
 import Masonry from '~/components/ui/Masonry.astro';
-import ModelViewport3D from '~/components/widgets/ModelViewport3D.astro';
 import Note from '~/components/widgets/Note.astro';
-import ParallaxMasonryHorizontal from '~/components/widgets/ParallaxMasonryHorizontal.astro';
 import Steps2 from '~/components/widgets/Steps2.astro';
-import ParallaxPanel from '~/components/ui/ParallaxPanel.astro';
+import RotatingText from '~/components/ui/RotatingText.astro';
 import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
+
 
 import { Image } from 'astro:assets';
 import carouselImage1 from '~/assets/images/TopBanner_Bellevue_Kitchen.jpg';
@@ -27,7 +26,7 @@ import galleryImg5 from '~/assets/images/WholeHouse/Seattle/WH_Seattle_Front.jpg
 import galleryImg6 from '~/assets/images/WholeHouse/Seattle/WH_Seattle_Patio.jpg';
 import galleryImg7 from '~/assets/images/Addition/Bellevue/Addition_Bellevue_Kitchen.jpg';
 import galleryImg8 from '~/assets/images/Addition/Kirkland/Addition_Kirkland_Sitting.jpg';
-import galleryImg9 from '~/assets/images/Remodeling/MercerIsland/Remodel_MI_Stairs.JPG';
+import galleryImg9 from '~/assets/images/Remodeling/MercerIsland/Remodel_MI_Stairs.jpg';
 import galleryImg10 from '~/assets/images/Remodeling/Seattle/RM_Seattle_Vanity.jpg';
 
 const metadata = {
@@ -35,7 +34,13 @@ const metadata = {
   ignoreTitleTemplate: true,
 };
 
-const masonryItems = [
+const carouselImages = [
+  { src: carouselImage1, alt: 'Bellevue kitchen with custom cabinetry.' },
+  { src: carouselImage2, alt: 'Seattle kitchen renovation with open layout.' },
+  { src: carouselImage3, alt: 'Seattle primary suite with textured finishes.' },
+];
+
+const masonryImages = [
   { src: galleryImg1, alt: 'Front elevation of a custom Bellevue whole-house project.', span: 'lg', speed: 0.08 },
   { src: galleryImg2, alt: 'Bellevue whole-house kitchen with modern finishes.', span: 'xl', speed: 0.14 },
   { src: galleryImg3, alt: 'Bellevue primary bathroom detail shot.', span: 'md', speed: 0.12 },
@@ -62,27 +67,32 @@ const masonryItems = [
     image={{ src: '~/assets/images/WH-Seattle-Patio.jpg', alt: 'A beautiful covered patio with stone tile floor.' }}
   >
     <Fragment slot="title">
-      <span data-gsap-text>
-        <span class="inline">Looking for a</span>
-        <span class="block">
-          <span class="js-title-keyword text-accent dark:text-indigo-400"> Custom Home</span>?
+      <span class="block">
+        <span class="inline pb-2">Looking for a</span>       
+        <span class="hero-title text-indigo-400 my-2">
+          <RotatingText 
+          prefix=""
+          items={['Custom Home?', 'Commercial Building?', 'Renovation?', 'New Addition?']}
+          hold={2}
+          speed={0.4}
+          enterEase="back.out(2)"/>
         </span>
       </span>
     </Fragment>
 
     <Fragment slot="subtitle">
-      <span class="font-semibold block">Your dream home does not have to stay a dream.</span>
+      <span class="font-semibold block">Your dream home doesn't have to stay a dream.</span>
       <span class="mb-1 hidden sm:inline">
-        With over 20 years of experience and hundreds of happy clients, we are right at home with our network of architects
-        and suppliers.
+        We've worked with hundreds of clients over 20 years with our network of architects
+        and suppliers. We'd love to have your business too.
       </span>
+      
     </Fragment>
   </Hero2>
 
-  <Note  description="We operate in the <bold>Greater Seattle WA area</bold>, including Bothell, Bellevue, and more." />
+  <Note  description="We operate in the Greater Seattle WA area, including Medina, Clyde Hill, Bellevue, Bothell and more." />
 
-
-    <WidgetWrapper containerClass="relative inline-block max-w-full">
+    <WidgetWrapper id="gallery" containerClass="relative inline-block max-w-full">
       <header class="mb-8 md:mb-16 text-center max-w-3xl mx-auto">
         <h2 class="text-4xl md:text-5xl font-bold leading-tighter tracking-tighter font-heading" data-gsap-text>
           <span>Your</span> <span class="js-title-keyword">Vision</span> <span>is Our</span>
@@ -96,15 +106,11 @@ const masonryItems = [
       <div class="lg:w-5/6 mx-auto">
         <AtroposComponent client:load>
           <Carousel client:load>
-            <swiper-slide>
-              <Image src={carouselImage1} alt="Bellevue kitchen with custom cabinetry." />
-            </swiper-slide>
-            <swiper-slide>
-              <Image src={carouselImage2} alt="Seattle kitchen renovation with open layout." />
-            </swiper-slide>
-            <swiper-slide>
-              <Image src={carouselImage3} alt="Seattle primary suite with textured finishes." />
-            </swiper-slide>
+            {carouselImages.map((image, index) => (
+              <swiper-slide key={index}>
+                <Image src={image.src} alt={image.alt} />
+              </swiper-slide>
+            ))}
           </Carousel>
         </AtroposComponent>
       </div>
@@ -121,7 +127,7 @@ const masonryItems = [
         columnClass=""
       >
         {
-          masonryItems.map((item, index) => (
+          masonryImages.map((item, index) => (
             <figure class:list={['sb-masonry-card', `sb-span-${item.span}`]} data-speed={item.speed}>
               <Image
                 src={item.src}
@@ -166,11 +172,17 @@ const masonryItems = [
     id="contact"
     title="Contact Us"
     subtitle="Drop us a message today and we'll get you started!"
+    button="Submit"
     inputs={[
       {
         type: 'hidden',
         name: 'access_key',
-        value: '7226230d-95e6-4189-9400-03edd827c421', // jerry@sensiblebuilder.com
+        value: '04d0e42b-42d9-4d7e-9c1b-a536b8744bfc', // jerry@sensiblebuilder.com
+      },
+      {
+        type: 'hidden',
+        name: 'redirect',
+        value: 'https://sensiblebuilder.com/#contact',
       },
       {
         type: 'text',
@@ -206,8 +218,7 @@ const masonryItems = [
 
   gsap.registerPlugin(ScrollTrigger);
 
-  if (typeof window !== 'undefined' && !window.__sbTitleKeywordInitialized) {
-    window.__sbTitleKeywordInitialized = true;
+  if (typeof window !== 'undefined') {
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!reducedMotion) {
