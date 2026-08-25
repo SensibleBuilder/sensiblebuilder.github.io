@@ -167,6 +167,8 @@ export interface Input {
   label?: string;
   autocomplete?: string;
   placeholder?: string;
+  value?: HTMLFormInputValue;
+  required?: boolean;
 }
 
 export interface Textarea {
@@ -174,6 +176,7 @@ export interface Textarea {
   name?: string;
   placeholder?: string;
   rows?: number;
+  required?: boolean;
 }
 
 export interface Disclaimer {
@@ -205,6 +208,8 @@ export interface Collapse {
 }
 
 export interface Form {
+  action?: string;
+  method?: string;
   inputs?: Array<Input>;
   textarea?: Textarea;
   disclaimer?: Disclaimer;

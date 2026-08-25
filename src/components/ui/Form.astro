@@ -2,14 +2,27 @@
 import type { Form as Props } from '~/types';
 import Button from '~/components/ui/Button.astro';
 
-const { inputs, textarea, disclaimer, button = 'Contact us', description = '' } = Astro.props;
+const { 
+
+  action = '',
+  method = 'POST',
+  inputs, 
+  textarea = {
+    label: 'Message',
+    required: true,
+  }, 
+  disclaimer, 
+  button = 'Contact us', 
+  description = '' 
+
+  } = Astro.props;
 ---
 
-<form>
+<form action={action} method={method}>
   {
     inputs &&
       inputs.map(
-        ({ type = 'text', name, label = '', autocomplete = 'on', placeholder = '' }) =>
+        ({ type = 'text', name, label = '', autocomplete = 'on', placeholder = '', value = '', required = false }) =>
           name && (
             <div class="mb-6">
               {label && (
@@ -23,6 +36,8 @@ const { inputs, textarea, disclaimer, button = 'Contact us', description = '' } 
                 id={name}
                 autocomplete={autocomplete}
                 placeholder={placeholder}
+                value={value}
+                required={required}
                 class="py-3 px-4 block w-full text-md rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900"
               />
             </div>
@@ -32,7 +47,7 @@ const { inputs, textarea, disclaimer, button = 'Contact us', description = '' } 
 
   {
     textarea && (
-      <div>
+      <div class="grid columns-2 pd-8">
         <label for="textarea" class="block text-sm font-medium">
           {textarea.label}
         </label>
@@ -41,6 +56,7 @@ const { inputs, textarea, disclaimer, button = 'Contact us', description = '' } 
           name={textarea.name ? textarea.name : 'message'}
           rows={textarea.rows ? textarea.rows : 4}
           placeholder={textarea.placeholder}
+          required={textarea.required}
           class="py-3 px-4 block w-full text-md rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900"
         />
       </div>
@@ -55,6 +71,7 @@ const { inputs, textarea, disclaimer, button = 'Contact us', description = '' } 
             id="disclaimer"
             name="disclaimer"
             type="checkbox"
+            required={true}
             class="cursor-pointer mt-1 py-3 px-4 block w-full text-md rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900"
           />
         </div>
@@ -84,4 +101,7 @@ const { inputs, textarea, disclaimer, button = 'Contact us', description = '' } 
       </div>
     )
   }
+
+  <!-- Optional: But Recommended: To Prevent SPAM Submission. Make sure its hidden by default -->
+  <input type="checkbox" name="botcheck" id="" class="hidden">
 </form>

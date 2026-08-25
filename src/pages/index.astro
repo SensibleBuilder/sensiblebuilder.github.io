@@ -1,12 +1,17 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 
+import AtroposComponent from '~/components/ui/AtroposComponent.svelte';
 import Carousel from '~/components/widgets/Carousel.svelte';
-import Features2 from '~/components/widgets/Features2.astro';
-import Headline from '~/components/blog/Headline.astro';
+
+import ContactUs from '~/components/widgets/Contact.astro';
 import Hero2 from '~/components/widgets/Hero2.astro';
+import Masonry from '~/components/ui/Masonry.astro';
+import ModelViewport3D from '~/components/widgets/ModelViewport3D.astro';
 import Note from '~/components/widgets/Note.astro';
+import ParallaxMasonryHorizontal from '~/components/widgets/ParallaxMasonryHorizontal.astro';
 import Steps2 from '~/components/widgets/Steps2.astro';
+import ParallaxPanel from '~/components/ui/ParallaxPanel.astro';
 import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
 
 import { Image } from 'astro:assets';
@@ -14,16 +19,37 @@ import carouselImage1 from '~/assets/images/TopBanner_Bellevue_Kitchen.jpg';
 import carouselImage2 from '~/assets/images/TopBanner_Seattle_Kitchen.jpg';
 import carouselImage3 from '~/assets/images/TopBanner_Seattle_MB.jpg';
 
+import galleryImg1 from '~/assets/images/WholeHouse/Bellevue/WH_Bellevue_Front.jpg';
+import galleryImg2 from '~/assets/images/WholeHouse/Bellevue/WH_Bellevue_Kitchen.jpg';
+import galleryImg3 from '~/assets/images/WholeHouse/Bellevue/WH_Bellevue_MB.jpg';
+import galleryImg4 from '~/assets/images/WholeHouse/Bellevue/WH_Bellevue_Stair.jpg';
+import galleryImg5 from '~/assets/images/WholeHouse/Seattle/WH_Seattle_Front.jpg';
+import galleryImg6 from '~/assets/images/WholeHouse/Seattle/WH_Seattle_Patio.jpg';
+import galleryImg7 from '~/assets/images/Addition/Bellevue/Addition_Bellevue_Kitchen.jpg';
+import galleryImg8 from '~/assets/images/Addition/Kirkland/Addition_Kirkland_Sitting.jpg';
+import galleryImg9 from '~/assets/images/Remodeling/MercerIsland/Remodel_MI_Stairs.JPG';
+import galleryImg10 from '~/assets/images/Remodeling/Seattle/RM_Seattle_Vanity.jpg';
 
 const metadata = {
   title: 'Sensible Builder - Custom Homes, Additions, Renovations',
-  ignoreTitleTemplate: true,  
+  ignoreTitleTemplate: true,
 };
+
+const masonryItems = [
+  { src: galleryImg1, alt: 'Front elevation of a custom Bellevue whole-house project.', span: 'lg', speed: 0.08 },
+  { src: galleryImg2, alt: 'Bellevue whole-house kitchen with modern finishes.', span: 'xl', speed: 0.14 },
+  { src: galleryImg3, alt: 'Bellevue primary bathroom detail shot.', span: 'md', speed: 0.12 },
+  { src: galleryImg4, alt: 'Bellevue staircase with natural light.', span: 'lg', speed: 0.18 },
+  { src: galleryImg5, alt: 'Seattle project front facade on a bright day.', span: 'md', speed: 0.16 },
+  { src: galleryImg6, alt: 'Covered patio transition space in Seattle residence.', span: 'xl', speed: 0.1 },
+  { src: galleryImg7, alt: 'Bellevue addition kitchen with warm wood tones.', span: 'lg', speed: 0.22 },
+  { src: galleryImg8, alt: 'Kirkland addition sitting area with layered texture.', span: 'md', speed: 0.12 },
+  { src: galleryImg9, alt: 'Mercer Island remodel staircase and wall detailing.', span: 'xl', speed: 0.2 },
+  { src: galleryImg10, alt: 'Seattle remodel vanity and mirror composition.', span: 'lg', speed: 0.14 },
+];
 ---
 
 <Layout metadata={metadata}>
-  <!-- Hero Widget ******************* -->
-
   <Hero2
     actions={[
       {
@@ -31,439 +57,222 @@ const metadata = {
         text: 'Get your quote today',
         href: '#contact',
         icon: 'tabler:phone',
-      }
+      },
     ]}
-    image={{ src: '~/assets/images/WH-Seattle-Patio.jpg', alt: 'A beautiful covered patio with stone tile floor.  ' }}
+    image={{ src: '~/assets/images/WH-Seattle-Patio.jpg', alt: 'A beautiful covered patio with stone tile floor.' }}
   >
-
     <Fragment slot="title">
-      <span class="inline">Looking for a</span>
-      <span class="block">
-        <span class="text-accent dark:text-indigo-400"> Custom Home</span>?
+      <span data-gsap-text>
+        <span class="inline">Looking for a</span>
+        <span class="block">
+          <span class="js-title-keyword text-accent dark:text-indigo-400"> Custom Home</span>?
+        </span>
       </span>
     </Fragment>
 
     <Fragment slot="subtitle">
-      <span class="font-semibold block">Your dream home doesn't have to stay a dream.</span>  
-      <span class="mb-1 hidden sm:inline"> With over 20 years of experience and dozens of happy clients, we're right at home with our network of architects and suppliers.</span>
+      <span class="font-semibold block">Your dream home does not have to stay a dream.</span>
+      <span class="mb-1 hidden sm:inline">
+        With over 20 years of experience and hundreds of happy clients, we are right at home with our network of architects
+        and suppliers.
+      </span>
     </Fragment>
-
   </Hero2>
-  
-  <!-- Note Widget ******************* -->
 
-  <Note title="Where We Work:" description="We operate in the Greater Seattle WA area, including Bothell, Bellevue, and more." />
-  
-  <!-- Gallery -->
-  <WidgetWrapper id="gallery" containerClass="relative max-w-full inline-block">
-    <Headline title={"Your Vision is Our Reality"} subtitle={"Our services cover everything from custom homes to remodels and additions."}/>
-    <Carousel client:load>
-      <swiper-slide>
-        <Image src={carouselImage1} alt="Sensible Builder logo."></Image>
-      </swiper-slide>
-      <swiper-slide>
-        <Image src={carouselImage2} alt="Sensible Builder logo."></Image>
-      </swiper-slide>
-      <swiper-slide>
-        <Image src={carouselImage3} alt="Sensible Builder logo."></Image>
-      </swiper-slide>
-    </Carousel>
-  </WidgetWrapper>
+  <Note  description="We operate in the <bold>Greater Seattle WA area</bold>, including Bothell, Bellevue, and more." />
 
-  <!-- About Us -->
 
-  <Steps2
-    title="Our values"
-    subtitle="As homeowners, we understand that contracting is a huge and potentially frustrating endeavour. That's why we work closely with our clients to ensure that homes are designed with the utmost care."
-    items={[
-      {
-        title: 'Customer-centric Process',
-        description:
-          'We pride ourselves on communication, fast response times, and in-depth discussions to keep you in the loop. Letting your voice be heard is our top priority.',
-        icon: 'tabler:users'
-      },
-      {
-        title: 'Holistic Design',
-        description:
-          'Our approach to designing houses takes into consideration a wide variety of factors, from eco-friendliness and material efficiency to interior and psychological design.',
-        icon: 'tabler:home'
-      },
-      {
-        title: 'Passion',
-        description:
-          'Every project we take is more than just a house to us. We know how important homes are to everyone, whether for yourself or for your family.',
-        icon: 'tabler:heart'
-      },
-    ]}
-    id="about"
-  />
+    <WidgetWrapper containerClass="relative inline-block max-w-full">
+      <header class="mb-8 md:mb-16 text-center max-w-3xl mx-auto">
+        <h2 class="text-4xl md:text-5xl font-bold leading-tighter tracking-tighter font-heading" data-gsap-text>
+          <span>Your</span> <span class="js-title-keyword">Vision</span> <span>is Our</span>
+          <span class="js-title-keyword">Reality</span>
+        </h2>
+        <p class="mt-2 md:mt-3 mx-auto text-xl text-gray-500 dark:text-slate-400 font-medium">
+          Our services cover everything from custom homes to remodels and additions.
+        </p>
+      </header>
 
-  <!-- Contact -->
+      <div class="lg:w-5/6 mx-auto">
+        <AtroposComponent client:load>
+          <Carousel client:load>
+            <swiper-slide>
+              <Image src={carouselImage1} alt="Bellevue kitchen with custom cabinetry." />
+            </swiper-slide>
+            <swiper-slide>
+              <Image src={carouselImage2} alt="Seattle kitchen renovation with open layout." />
+            </swiper-slide>
+            <swiper-slide>
+              <Image src={carouselImage3} alt="Seattle primary suite with textured finishes." />
+            </swiper-slide>
+          </Carousel>
+        </AtroposComponent>
+      </div>
+    </WidgetWrapper>
 
-  <Features2
-    title="Contact Us"
-    subtitle='Call now for a free consultation - leave us a message and we will get back to you as soon as possible.'
-    isAfterContent={true}
-    items={[
-      {
-        title: 'Phone',
-        description: '+1 (206) 694-3882',
-        icon: 'tabler:headset',
-      },
-      {
-        title: 'Email',
-        description: 'jerry@sensiblebuilder.com',
-        icon: 'tabler:mail',
-      },
-      {
-        title: 'WeChat',
-        description: '@jhz5947',
-        icon: 'tabler:brand-wechat'
-      }
-    ]}
+    <WidgetWrapper containerClass="max-w-full">
+      <Masonry
+        breakpointCols={{
+          default: 3,
+          1200: 3,
+          700: 2,
+        }}
+        class="flex gap-4 px-4"
+        columnClass=""
+      >
+        {
+          masonryItems.map((item, index) => (
+            <figure class:list={['sb-masonry-card', `sb-span-${item.span}`]} data-speed={item.speed}>
+              <Image
+                src={item.src}
+                alt={item.alt}
+                class="sb-masonry-image"
+                widths={[400, 640, 960, 1200]}
+                sizes="(max-width: 768px) 75vw, 22vw"
+                loading={index < 3 ? 'eager' : 'lazy'}
+              />
+            </figure>
+          ))
+        }
+      </Masonry>
+    </WidgetWrapper>
+
+    <Steps2
+      title="Our <span class='js-title-keyword'>values</span>"
+      subtitle="As homeowners, we understand that contracting is a huge and potentially frustrating endeavor. That is why we work closely with our clients to ensure that homes are designed with the utmost care."
+      items={[
+        {
+          title: 'Customer-centric Process',
+          description:
+            'We pride ourselves on communication, fast response times, and in-depth discussions to keep you in the loop. Letting your voice be heard is our top priority.',
+          icon: 'tabler:users',
+        },
+        {
+          title: 'Holistic Design',
+          description:
+            'Our approach to designing houses takes into consideration a wide variety of factors, from eco-friendliness and material efficiency to interior and psychological design.',
+          icon: 'tabler:home',
+        },
+        {
+          title: 'Passion',
+          description:
+            'Every project we take is more than just a house to us. We know how important homes are to everyone, whether for yourself or for your family.',
+          icon: 'tabler:heart',
+        },
+      ]}
+      id="about"
+    />
+  <ContactUs
     id="contact"
-  />
-
-  <!-- Features Widget *************** 
-
-  <Features
-    id="features"
-    tagline="Features"
-    title="What you get with AstroWind"
-    subtitle="One of the most professional and comprehensive templates currently on the market. Most starred & forked Astro theme in 2022, 2023 and 2024."
-    items={[
+    title="Contact Us"
+    subtitle="Drop us a message today and we'll get you started!"
+    inputs={[
       {
-        title: 'Astro + Tailwind CSS Integration',
-        description:
-          'A seamless integration between two great frameworks that offer high productivity, performance and versatility.',
-        icon: 'tabler:brand-tailwind',
+        type: 'hidden',
+        name: 'access_key',
+        value: '7226230d-95e6-4189-9400-03edd827c421', // jerry@sensiblebuilder.com
       },
       {
-        title: 'Ready-to-use Components',
-        description:
-          'Widgets made with Tailwind CSS ready to be used in Marketing Websites, SaaS, Blogs, Personal Profiles, Small Business...',
-        icon: 'tabler:components',
+        type: 'text',
+        name: 'name',
+        label: 'Name',
+        required: true,
       },
       {
-        title: 'Best Practices',
-        description:
-          'Creating secure, efficient, and user-friendly websites that deliver exceptional experiences and lasting value.',
-        icon: 'tabler:list-check',
+        type: 'email',
+        name: 'email',
+        label: 'Email',
+        required: false,
       },
       {
-        title: 'Excellent Page Speed',
-        description:
-          'Having a good page speed impacts organic search ranking, improves user experience (UI/UX) and increase conversion rates.',
-        icon: 'tabler:rocket',
-      },
-      {
-        title: 'Search Engine Optimization (SEO)',
-        description:
-          "SEO lies in its ability to enhance a website's visibility, driving organic traffic and enabling it to reach a wider audience.",
-        icon: 'tabler:arrows-right-left',
-      },
-      {
-        title: 'Open to new ideas and contributions',
-        description:
-          'Embracing a culture that is open to new ideas and contributions is integral fostering innovation, collaboration, and a dynamic user experience.',
-        icon: 'tabler:bulb',
+        type: 'tel',
+        name: 'phone',
+        label: 'Phone',
+        required: false,
       },
     ]}
-  />
-
-   Content Widget ****************
-
-  <Content
-    isReversed
-    tagline="Inside template"
-    title="AstroWind's Blueprint: Fun Meets Functionality!"
-    items={[
-      {
-        title: 'Built on top of Astro 5.0',
-        description:
-          'Benefiting from the performance and developer-friendly features of this modern static site generator.',
-      },
-      {
-        title: 'Styled using Tailwind CSS',
-        description:
-          'Facilitating rapid design and consistent styling with this highly popular utility-first CSS framework.',
-      },
-      {
-        title: 'Cross-browser compatibility',
-        description:
-          'Ensure your website looks and functions consistently across various web browsers, delivering a seamless experience to all users.',
-      },
-    ]}
-    image={{
-      src: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-      alt: 'Colorful Image',
+    textarea={{
+      label: 'Message',
+      required: true,
     }}
-  >
-    <Fragment slot="content">
-      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">Building on modern foundations</h3>
-      Gain a competitive advantage by incorporating industry leading practices
-    </Fragment>
-
-    <Fragment slot="bg">
-      <div class="absolute inset-0 bg-blue-50 dark:bg-transparent"></div>
-    </Fragment>
-  </Content>
-
-  Content Widget **************** 
-
-  <Content
-    isAfterContent
-    items={[
-      {
-        title: 'High level of customization',
-        description: `Tailor the template effortlessly to match your brand's identity and requirements, making your website distinct and saving you time.`,
-      },
-      {
-        title: 'Multiple layout possibilities',
-        description:
-          'Explore various layout options to find the structure that best presents your content, enhancing user engagement and navigation.',
-      },
-      {
-        title: 'Fully responsive design',
-        description:
-          "Ensure your website's optimal performance on various devices and screen sizes, providing a consistent and enjoyable user experience.",
-      },
-      {
-        title: 'Integration of media',
-        description:
-          'Seamlessly incorporate images, videos, and multimedia elements that enhance your content and engage visitors effectively.',
-      },
-    ]}
-    image={{
-      src: 'https://images.unsplash.com/photo-1600132806370-bf17e65e942f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2194&q=80',
-      alt: 'Blueprint Image',
-    }}
-  >
-    <Fragment slot="content">Ensure your online presence truly represents you.</Fragment>
-
-    <Fragment slot="bg">
-      <div class="absolute inset-0 bg-blue-50 dark:bg-transparent"></div>
-    </Fragment>
-  </Content>
-
-   Content Widget **************** 
-
-  <Content
-    isReversed
-    isAfterContent
-    items={[
-      {
-        title: 'Enhanced user engagement',
-        description:
-          'Captivate your audience with interactive elements, intuitive navigation, and visually appealing layouts, encouraging longer visits.',
-      },
-      {
-        title: 'Continuous improvement',
-        description:
-          'Ensure your website stays aligned with the latest trends and technologies through regular updates and enhancements.',
-      },
-      {
-        title: 'Time and resource efficiency',
-        description:
-          'Skip the time-consuming process of building a website from scratch and launch your online presence sooner with AstroWind.',
-      },
-      {
-        title: 'Community support',
-        description: `Join the growing AstroWind community for insights, resources, and assistance, ensuring you're never alone on your web development journey.`,
-      },
-    ]}
-    image={{
-      src: 'https://images.unsplash.com/photo-1611462985358-60d3498e0364?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-      alt: 'Astronauts Image',
-    }}
-  >
-    <Fragment slot="content">Designed to foster growth and success.</Fragment>
-
-    <Fragment slot="bg">
-      <div class="absolute inset-0 bg-blue-50 dark:bg-transparent"></div>
-    </Fragment>
-  </Content>
-
-  Steps Widget ******************
-
-  <Steps
-    title="Get your dream website up and running in no time with AstroWind."
-    items={[
-      {
-        title: 'Step 1: <span class="font-medium">Download</span>',
-        description:
-          "Kickstart with GitHub! Either fork the AstroWind template or simply click 'Use this template'. Your canvas awaits, ready for your digital masterpiece. In just a few clicks, you've already set the foundation.",
-        icon: 'tabler:package',
-      },
-      {
-        title: 'Step 2: <span class="font-medium">Add content</span>',
-        description:
-          "Pour your vision into it. Add images, text, and all that jazz to breathe life into your digital space. Remember, it's the content that tells your story, so make it captivating.",
-        icon: 'tabler:letter-case',
-      },
-      {
-        title: 'Step 3: <span class="font-medium">Customize styles</span>',
-        description:
-          'Give it your personal touch. Tailor colors, fonts, and layouts until it feels just right. Your unique flair, amplified by AstroWind! Precision in design ensures a seamless user experience.',
-        icon: 'tabler:paint',
-      },
-      {
-        title: 'Ready!',
-        icon: 'tabler:check',
-      },
-    ]}
-    image={{
-      src: 'https://images.unsplash.com/photo-1616198814651-e71f960c3180?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80',
-      alt: 'Steps image',
-    }}
+    description="Responses are usually expected within 12 business hours."
   />
 
-  Features2 Widget **************
-
-  <Features2
-    title="Most used widgets"
-    subtitle="Provides frequently used components for building websites using Tailwind CSS"
-    tagline="Components"
-    items={[
-      {
-        title: 'Headers',
-        description: "Ever tried driving without GPS? Boom! That's why websites need headers for direction.",
-        icon: 'flat-color-icons:template',
-      },
-      {
-        title: 'Heros',
-        description:
-          "Picture a superhero landing – epic, right? That's the job of a Hero section, making grand entrances!",
-        icon: 'flat-color-icons:gallery',
-      },
-      {
-        title: 'Features',
-        description:
-          'Where websites strut their stuff and show off superpowers. No holding back on the bragging rights here!',
-        icon: 'flat-color-icons:approval',
-      },
-      {
-        title: 'Content',
-        description:
-          "Dive into the meat and potatoes of a site; without it, you'd just be window shopping. Content is king.",
-        icon: 'flat-color-icons:document',
-      },
-      {
-        title: 'Call-to-Action',
-        description:
-          'That enthusiastic friend who\'s always urging, "Do it! Do it!"? Yeah, that\'s this button nudging you towards adventure.',
-        icon: 'flat-color-icons:advertising',
-      },
-      {
-        title: 'Pricing',
-        description: 'Behold the dessert menu of the website world. Tempting choices await, can you resist?',
-        icon: 'flat-color-icons:currency-exchange',
-      },
-      {
-        title: 'Testimonial',
-        description: 'Step into the gossip corner! Here, other visitors spill the beans and share the juicy details.',
-        icon: 'flat-color-icons:voice-presentation',
-      },
-      {
-        title: 'Contact',
-        description:
-          'Like a digital mailbox, but faster! Drop a line, ask a question, or send a virtual high-five. Ding! Message in.',
-        icon: 'flat-color-icons:business-contact',
-      },
-      {
-        title: 'Footers',
-        description: "The footer's like the credits of a movie but sprinkled with easter eggs. Time to hunt!",
-        icon: 'flat-color-icons:database',
-      },
-    ]}
-  >
-    <Fragment slot="bg">
-      <div class="absolute inset-0 bg-blue-50 dark:bg-transparent"></div>
-    </Fragment>
-  </Features2>
-
-  HighlightedPosts Widget ******* 
-
-  <BlogLatestPosts
-    title="Find out more content in our Blog"
-    information={`The blog is used to display AstroWind documentation.
-                        Each new article will be an important step that you will need to know to be an expert in creating a website using Astro + Tailwind CSS.
-                        Astro is a very interesting technology. Thanks.
-                `}
-  />
-
-  FAQs Widget ******************* 
-
-  <FAQs
-    title="Frequently Asked Questions"
-    subtitle="Dive into the following questions to gain insights into the powerful features that AstroWind offers and how it can elevate your web development journey."
-    tagline="FAQs"
-    classes={{ container: 'max-w-6xl' }}
-    items={[
-      {
-        title: 'Why AstroWind?',
-        description:
-          "Michael Knight a young loner on a crusade to champion the cause of the innocent. The helpless. The powerless in a world of criminals who operate above the law. Here he comes Here comes Speed Racer. He's a demon on wheels.",
-      },
-      {
-        title: 'What do I need to start?',
-        description:
-          'Space, the final frontier. These are the voyages of the Starship Enterprise. Its five-year mission: to explore strange new worlds. Many say exploration is part of our destiny, but it’s actually our duty to future generations.',
-      },
-      {
-        title: 'How to install the Astro + Tailwind CSS template?',
-        description:
-          "Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows.",
-      },
-      {
-        title: "What's something that you don't understand?",
-        description:
-          "A flower in my garden, a mystery in my panties. Heart attack never stopped old Big Bear. I didn't even know we were calling him Big Bear.",
-      },
-      {
-        title: 'What is something that you would like to try again?',
-        description:
-          "A business big enough that it could be listed on the NASDAQ goes belly up. Disappears! It ceases to exist without me. No, you clearly don't know who you're talking to, so let me clue you in.",
-      },
-      {
-        title: 'If you could only ask one question to each person you meet, what would that question be?',
-        description:
-          "This is not about revenge. This is about justice. A lot of things can change in twelve years, Admiral. Well, that's certainly good to know. About four years. I got tired of hearing how young I looked.",
-      },
-    ]}
-  />
-
-  Stats Widget ****************** 
-
-  <Stats
-    stats={[
-      { title: 'Downloads', amount: '132K' },
-      { title: 'Stars', amount: '24.8K' },
-      { title: 'Forks', amount: '10.3K' },
-      { title: 'Users', amount: '48.4K' },
-    ]}
-  />
-
-  CallToAction Widget *********** 
-
-  <CallToAction
-    actions={[
-      {
-        variant: 'primary',
-        text: 'Get template',
-        href: 'https://github.com/onwidget/astrowind',
-        target: '_blank',
-        icon: 'tabler:download',
-      },
-    ]}
-  >
-    <Fragment slot="title">
-      Astro&nbsp;+&nbsp;<br class="block sm:hidden" /><span class="sm:whitespace-nowrap">Tailwind CSS</span>
-    </Fragment>
-
-    <Fragment slot="subtitle">
-      Be very surprised by these huge fake numbers you are seeing on this page. <br class="hidden md:inline" />Don't
-      waste more time! :P
-    </Fragment>
-  </CallToAction> -->
 </Layout>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  if (typeof window !== 'undefined' && !window.__sbTitleKeywordInitialized) {
+    window.__sbTitleKeywordInitialized = true;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reducedMotion) {
+      document.querySelectorAll('[data-gsap-text]').forEach((heading) => {
+        const words = [...heading.querySelectorAll('span')];
+        const keywords = [...heading.querySelectorAll('.js-title-keyword')];
+
+        if (words.length) {
+          gsap.fromTo(
+            words,
+            { yPercent: 30, opacity: 0, rotateX: -25, transformOrigin: '50% 100%' },
+            {
+              yPercent: 0,
+              opacity: 1,
+              rotateX: 0,
+              duration: 0.9,
+              ease: 'power3.out',
+              stagger: 0.06,
+              scrollTrigger: {
+                trigger: heading,
+                start: 'top 88%',
+                toggleActions: 'play none none reverse',
+              },
+            }
+          );
+        }
+
+        keywords.forEach((keyword, index) => {
+          gsap.fromTo(
+            keyword,
+            { scale: 0.9, filter: 'blur(4px)', opacity: 0.7 },
+            {
+              scale: 1,
+              filter: 'blur(0px)',
+              opacity: 1,
+              color: 'rgb(14 165 233)',
+              duration: 0.85,
+              delay: Math.min(index * 0.08, 0.2),
+              ease: 'power2.out',
+              scrollTrigger: {
+                trigger: heading,
+                start: 'top 88%',
+                toggleActions: 'play none none reverse',
+              },
+            }
+          );
+        });
+      });
+    }
+  }
+</script>
+
+<style>
+  :global([data-gsap-text] span) {
+    display: inline-block;
+    transform-style: preserve-3d;
+  }
+
+  :global(.js-title-keyword) {
+    will-change: transform, filter;
+  }
+  .sb-masonry-card {
+    will-change: transform, opacity;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+</style>
