@@ -3,9 +3,9 @@ export interface Props {
   prefix?: string;
   items?: string[];
   /** Tailwind / utility classes */
-  class?: string;        // root: set type scale, weight, gap, etc. here
-  prefixClass?: string;  // e.g. "text-neutral-900"
-  accentClass?: string;  // e.g. "text-rose-700"
+  class?: string; // root: set type scale, weight, gap, etc. here
+  prefixClass?: string; // e.g. "text-neutral-900"
+  accentClass?: string; // e.g. "text-rose-700"
   /** timing */
   hold?: number;
   speed?: number;
@@ -36,7 +36,17 @@ const {
 const longest = items.reduce((a, b) => (b.length > a.length ? b : a), items[0] ?? '');
 const rows = rewind ? items : [...items, items[0]]; // clone = step-up wrap fallback
 
-const opts = JSON.stringify({ hold, speed, switchDelay, enterEase, rewind, rewindEase, rewindScale, autoplay, clone: !rewind });
+const opts = JSON.stringify({
+  hold,
+  speed,
+  switchDelay,
+  enterEase,
+  rewind,
+  rewindEase,
+  rewindScale,
+  autoplay,
+  clone: !rewind,
+});
 ---
 
 <span
@@ -45,7 +55,13 @@ const opts = JSON.stringify({ hold, speed, switchDelay, enterEase, rewind, rewin
   class={`rotator ${className}`}
   aria-label={`${prefix} ${items.join(' ')}`.trim()}
 >
-  {prefix && <span class={`prefix ${prefixClass}`} aria-hidden="true">{prefix}</span>}
+  {
+    prefix && (
+      <span class={`prefix ${prefixClass}`} aria-hidden="true">
+        {prefix}
+      </span>
+    )
+  }
 
   <span class="sizer" data-sizer>
     <!-- reserves the outer footprint (tallest likely item) → no layout shift -->
@@ -65,26 +81,52 @@ const opts = JSON.stringify({ hold, speed, switchDelay, enterEase, rewind, rewin
 </span>
 
 <style>
-  .rotator { display: flex; flex-direction: column; align-items: flex-start; }
+  .rotator {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
   /* normal leading = the font's own content box → mask always contains full glyphs */
-  .prefix { display: block; line-height: var(--rt-leading, normal); }
+  .prefix {
+    display: block;
+    line-height: var(--rt-leading, normal);
+  }
 
   .sizer {
-    position: relative; display: block; width: 100%;
-    line-height: var(--rt-leading, normal);   /* rows + both ghosts inherit this */
+    position: relative;
+    display: block;
+    width: 100%;
+    line-height: var(--rt-leading, normal); /* rows + both ghosts inherit this */
   }
-  .ghost { display: block; visibility: hidden; }
+  .ghost {
+    display: block;
+    visibility: hidden;
+  }
 
-  .swap { position: absolute; top: 0; left: 0; width: 100%; }
+  .swap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
 
   .clip {
-    position: absolute; top: 0; left: 0; width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
     height: 100%;
     overflow: hidden;
   }
-  .reel { position: relative; display: block; will-change: transform; }
-  .row  { display: block; }
+  .reel {
+    position: relative;
+    display: block;
+    will-change: transform;
+  }
+  .row {
+    display: block;
+  }
 </style>
 
 <script>
@@ -95,8 +137,8 @@ const opts = JSON.stringify({ hold, speed, switchDelay, enterEase, rewind, rewin
   document.querySelectorAll<HTMLElement>('[data-rotator]').forEach((root) => {
     const o = JSON.parse(root.dataset.options || '{}');
     const sizer = root.querySelector<HTMLElement>('[data-sizer]')!;
-    const clip  = root.querySelector<HTMLElement>('[data-clip]')!;
-    const reel  = root.querySelector<HTMLElement>('[data-reel]')!;
+    const clip = root.querySelector<HTMLElement>('[data-clip]')!;
+    const reel = root.querySelector<HTMLElement>('[data-reel]')!;
     const rowEls = Array.from(reel.children) as HTMLElement[];
 
     let m: { top: number; h: number }[] = [];
@@ -123,21 +165,39 @@ const opts = JSON.stringify({ hold, speed, switchDelay, enterEase, rewind, rewin
     const build = () => {
       tl?.kill();
       measure();
-      if (!o.autoplay || reduce) { tl = undefined; setTo(0); return; }
+      if (!o.autoplay || reduce) {
+        tl = undefined;
+        setTo(0);
+        return;
+      }
       setTo(0);
 
       tl = gsap.timeline({ repeat: -1 });
-      tl.addLabel('item-0').call(() => {idx = 0})
-        .addLabel('rest-0').to({}, { duration: o.hold });
+      tl.addLabel('item-0')
+        .call(() => {
+          idx = 0;
+        })
+        .addLabel('rest-0')
+        .to({}, { duration: o.hold });
 
       for (let i = 1; i < rowEls.length; i++) {
         tl.addLabel(`item-${i}`, `+=${o.switchDelay}`)
-          .call(() => {idx = i})
+          .call(() => {
+            idx = i;
+          })
           // same curve for reel + mask → they travel in lockstep
-          .fromTo(reel, { y: -m[i - 1].top },
-                  { y: -m[i].top, duration: o.speed, ease: o.enterEase, immediateRender: false }, '<')
-          .fromTo(clip, { height: m[i - 1].h },
-                  { height: m[i].h, duration: o.speed, ease: o.enterEase, immediateRender: false }, '<')
+          .fromTo(
+            reel,
+            { y: -m[i - 1].top },
+            { y: -m[i].top, duration: o.speed, ease: o.enterEase, immediateRender: false },
+            '<'
+          )
+          .fromTo(
+            clip,
+            { height: m[i - 1].h },
+            { height: m[i].h, duration: o.speed, ease: o.enterEase, immediateRender: false },
+            '<'
+          )
           .addLabel(`rest-${i}`)
           .to({}, { duration: o.hold });
       }
@@ -146,12 +206,18 @@ const opts = JSON.stringify({ hold, speed, switchDelay, enterEase, rewind, rewin
         const last = rowEls.length - 1;
         const d = Math.max(o.speed, o.speed * last * o.rewindScale);
         tl.addLabel('rewind', `+=${o.switchDelay}`)
-          .fromTo(reel, { y: -m[last].top },
-                  { y: 0, duration: d, ease: o.rewindEase, immediateRender: false })
-          .fromTo(clip, { height: m[last].h },
-                  { height: m[0].h, duration: d, ease: o.rewindEase, immediateRender: false }, '<');
+          .fromTo(reel, { y: -m[last].top }, { y: 0, duration: d, ease: o.rewindEase, immediateRender: false })
+          .fromTo(
+            clip,
+            { height: m[last].h },
+            { height: m[0].h, duration: d, ease: o.rewindEase, immediateRender: false },
+            '<'
+          );
       } else if (o.clone) {
-        tl.call(() => { idx = 0; setTo(0); });
+        tl.call(() => {
+          idx = 0;
+          setTo(0);
+        });
       }
     };
 
@@ -161,7 +227,7 @@ const opts = JSON.stringify({ hold, speed, switchDelay, enterEase, rewind, rewin
     restore(0);
 
     const onResize = () => {
-      measure();          // glue the current row while sizes change
+      measure(); // glue the current row while sizes change
       setTo(idx);
       tl?.pause();
       clearTimeout(resizeT);

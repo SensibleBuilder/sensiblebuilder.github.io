@@ -12,7 +12,6 @@ import Steps2 from '~/components/widgets/Steps2.astro';
 import RotatingText from '~/components/ui/RotatingText.astro';
 import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
 
-
 import { Image } from 'astro:assets';
 import carouselImage1 from '~/assets/images/TopBanner_Bellevue_Kitchen.jpg';
 import carouselImage2 from '~/assets/images/TopBanner_Seattle_Kitchen.jpg';
@@ -68,14 +67,15 @@ const masonryImages = [
   >
     <Fragment slot="title">
       <span class="block">
-        <span class="inline pb-2">Looking for a</span>       
+        <span class="inline pb-2">Looking for a</span>
         <span class="hero-title text-indigo-400 my-2">
-          <RotatingText 
-          prefix=""
-          items={['Custom Home?', 'Commercial Building?', 'Renovation?', 'New Addition?']}
-          hold={2}
-          speed={0.4}
-          enterEase="back.out(2)"/>
+          <RotatingText
+            prefix=""
+            items={['Custom Home?', 'Commercial Building?', 'Renovation?', 'New Addition?']}
+            hold={2}
+            speed={0.4}
+            enterEase="back.out(2)"
+          />
         </span>
       </span>
     </Fragment>
@@ -83,91 +83,96 @@ const masonryImages = [
     <Fragment slot="subtitle">
       <span class="font-semibold block">Your dream home doesn't have to stay a dream.</span>
       <span class="mb-1 hidden sm:inline">
-        We've worked with hundreds of clients over 20 years with our network of architects
-        and suppliers. We'd love to have your business too.
+        We've worked with hundreds of clients over 20 years with our network of architects and suppliers. We'd love to
+        have your business too.
       </span>
-      
     </Fragment>
   </Hero2>
 
-  <Note  description="We operate in the Greater Seattle WA area, including Medina, Clyde Hill, Bellevue, Bothell and more." />
+  <Note
+    description="We operate in the Greater Seattle WA area, including Medina, Clyde Hill, Bellevue, Bothell and more."
+  />
 
-    <WidgetWrapper id="gallery" containerClass="relative inline-block max-w-full">
-      <header class="mb-8 md:mb-16 text-center max-w-3xl mx-auto">
-        <h2 class="text-4xl md:text-5xl font-bold leading-tighter tracking-tighter font-heading" data-gsap-text>
-          <span>Your</span> <span class="js-title-keyword">Vision</span> <span>is Our</span>
-          <span class="js-title-keyword">Reality</span>
-        </h2>
-        <p class="mt-2 md:mt-3 mx-auto text-xl text-gray-500 dark:text-slate-400 font-medium">
-          Our services cover everything from custom homes to remodels and additions.
-        </p>
-      </header>
+  <WidgetWrapper id="gallery" containerClass="relative inline-block max-w-full">
+    <header class="mb-8 md:mb-16 text-center max-w-3xl mx-auto">
+      <h2 class="text-4xl md:text-5xl font-bold leading-tighter tracking-tighter font-heading" data-gsap-text>
+        <span>Your</span>
+        <span class="js-title-keyword">Vision</span>
+        <span>is Our</span>
+        <span class="js-title-keyword">Reality</span>
+      </h2>
+      <p class="mt-2 md:mt-3 mx-auto text-xl text-gray-500 dark:text-slate-400 font-medium">
+        Our services cover everything from custom homes to remodels and additions.
+      </p>
+    </header>
 
-      <div class="lg:w-5/6 mx-auto">
-        <AtroposComponent client:load>
-          <Carousel client:load>
-            {carouselImages.map((image, index) => (
+    <div class="lg:w-5/6 mx-auto">
+      <AtroposComponent client:load>
+        <Carousel client:load>
+          {
+            carouselImages.map((image, index) => (
               <swiper-slide key={index}>
                 <Image src={image.src} alt={image.alt} />
               </swiper-slide>
-            ))}
-          </Carousel>
-        </AtroposComponent>
-      </div>
-    </WidgetWrapper>
+            ))
+          }
+        </Carousel>
+      </AtroposComponent>
+    </div>
+  </WidgetWrapper>
 
-    <WidgetWrapper containerClass="max-w-full">
-      <Masonry
-        breakpointCols={{
-          default: 3,
-          1200: 3,
-          700: 2,
-        }}
-        class="flex gap-4 px-4"
-        columnClass=""
-      >
-        {
-          masonryImages.map((item, index) => (
-            <figure class:list={['sb-masonry-card', `sb-span-${item.span}`]} data-speed={item.speed}>
-              <Image
-                src={item.src}
-                alt={item.alt}
-                class="sb-masonry-image"
-                widths={[400, 640, 960, 1200]}
-                sizes="(max-width: 768px) 75vw, 22vw"
-                loading={index < 3 ? 'eager' : 'lazy'}
-              />
-            </figure>
-          ))
-        }
-      </Masonry>
-    </WidgetWrapper>
+  <WidgetWrapper containerClass="max-w-full">
+    <Masonry
+      breakpointCols={{
+        default: 3,
+        1200: 3,
+        700: 2,
+      }}
+      class="flex gap-4 px-4"
+      columnClass=""
+    >
+      {
+        masonryImages.map((item, index) => (
+          <figure class:list={['sb-masonry-card', `sb-span-${item.span}`]} data-speed={item.speed}>
+            <Image
+              src={item.src}
+              alt={item.alt}
+              class="sb-masonry-image"
+              widths={[400, 640, 960, 1200]}
+              sizes="(max-width: 768px) 75vw, 22vw"
+              loading={index < 3 ? 'eager' : 'lazy'}
+            />
+          </figure>
+        ))
+      }
+    </Masonry>
+  </WidgetWrapper>
 
-    <Steps2
-      title="Our <span class='js-title-keyword'>values</span>"
-      subtitle="As homeowners, we understand that contracting is a huge and potentially frustrating endeavor. That is why we work closely with our clients to ensure that homes are designed with the utmost care."
-      items={[
-        {
-          title: 'Customer-centric Process',
-          description:
-            'We pride ourselves on communication, fast response times, and in-depth discussions to keep you in the loop. Letting your voice be heard is our top priority.',
-          icon: 'tabler:users',
-        },
-        {
-          title: 'Holistic Design',
-          description:
-            'Our approach to designing houses takes into consideration a wide variety of factors, from eco-friendliness and material efficiency to interior and psychological design.',
-          icon: 'tabler:home',
-        },
-        {
-          title: 'Passion',
-          description:
-            'Every project we take is more than just a house to us. We know how important homes are to everyone, whether for yourself or for your family.',
-          icon: 'tabler:heart',
-        },
-      ]}
-      id="about"
-    />
+  <Steps2
+    title="Our <span class='js-title-keyword'>values</span>"
+    subtitle="As homeowners, we understand that contracting is a huge and potentially frustrating endeavor. That is why we work closely with our clients to ensure that homes are designed with the utmost care."
+    items={[
+      {
+        title: 'Customer-centric Process',
+        description:
+          'We pride ourselves on communication, fast response times, and in-depth discussions to keep you in the loop. Letting your voice be heard is our top priority.',
+        icon: 'tabler:users',
+      },
+      {
+        title: 'Holistic Design',
+        description:
+          'Our approach to designing houses takes into consideration a wide variety of factors, from eco-friendliness and material efficiency to interior and psychological design.',
+        icon: 'tabler:home',
+      },
+      {
+        title: 'Passion',
+        description:
+          'Every project we take is more than just a house to us. We know how important homes are to everyone, whether for yourself or for your family.',
+        icon: 'tabler:heart',
+      },
+    ]}
+    id="about"
+  />
   <ContactUs
     id="contact"
     title="Contact Us"
@@ -209,7 +214,6 @@ const masonryImages = [
     }}
     description="Responses are usually expected within 12 business hours."
   />
-
 </Layout>
 
 <script>
@@ -219,7 +223,6 @@ const masonryImages = [
   gsap.registerPlugin(ScrollTrigger);
 
   if (typeof window !== 'undefined') {
-
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!reducedMotion) {
       document.querySelectorAll('[data-gsap-text]').forEach((heading) => {

@@ -21,7 +21,12 @@ const {
 ---
 
 <WidgetWrapper id={id} isDark={isDark} containerClass={`max-w-6xl mx-auto ${classes?.container ?? ''}`} bg={bg}>
-  <div class:list={['sb-values-shell', `flex flex-col gap-8 md:gap-12 md:flex-row ${isReversed ? 'md:flex-row-reverse' : ''}`]}>
+  <div
+    class:list={[
+      'sb-values-shell',
+      `flex flex-col gap-8 md:gap-12 md:flex-row ${isReversed ? 'md:flex-row-reverse' : ''}`,
+    ]}
+  >
     <div
       class:list={[
         'sb-values-copy w-full lg:w-1/2 gap-8 md:gap-12',
@@ -83,7 +88,6 @@ const {
   gsap.registerPlugin(ScrollTrigger);
 
   if (typeof window !== 'undefined') {
-
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!reducedMotion) {
       document.querySelectorAll<HTMLElement>('.sb-values-shell').forEach((section) => {
