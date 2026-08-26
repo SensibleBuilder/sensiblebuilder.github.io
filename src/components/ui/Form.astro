@@ -2,20 +2,31 @@
 import type { Form as Props } from '~/types';
 import Button from '~/components/ui/Button.astro';
 
-const { 
-
+const {
   action = '',
   method = 'POST',
-  inputs, 
+  inputs,
   textarea = {
     label: 'Message',
     required: true,
-  }, 
-  disclaimer, 
-  button = 'Contact us', 
-  description = '' 
+  },
+  disclaimer,
+  button = 'Contact us',
+  description = '',
+} = Astro.props;
+// Display success or error messages based on the form submission result
+function displayMessage(messageId: string) {
+  const successMessage = document.getElementById('success-message');
+  const errorMessage = document.getElementById('error-message');
 
-  } = Astro.props;
+  if (messageId === 'success-message') {
+    successMessage?.classList.remove('hidden');
+    errorMessage?.classList.add('hidden');
+  } else if (messageId === 'error-message') {
+    errorMessage?.classList.remove('hidden');
+    successMessage?.classList.add('hidden');
+  }
+}
 ---
 
 <form action={action} method={method}>
@@ -87,12 +98,19 @@ const {
   {
     button && (
       <div class="mt-10 grid">
-        <Button variant="primary" type="submit">
+        <Button variant="primary" type="submit" x-on:click={() => displayMessage('success-message')}>
           {button}
         </Button>
       </div>
     )
   }
+
+  <div id="success-message" class="hidden mt-4 text-green-600 dark:text-green-400">
+    Thank you for your message! We will get back to you soon.
+  </div>
+  <div id="error-message" class="hidden mt-4 text-red-600 dark:text-red-400">
+    Oops! Something went wrong. Please try again later.
+  </div>
 
   {
     description && (
@@ -103,5 +121,5 @@ const {
   }
 
   <!-- Optional: But Recommended: To Prevent SPAM Submission. Make sure its hidden by default -->
-  <input type="checkbox" name="botcheck" id="" class="hidden">
+  <input type="checkbox" name="botcheck" id="" class="hidden" />
 </form>
