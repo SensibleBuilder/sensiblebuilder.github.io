@@ -1,7 +1,8 @@
 ---
-import FormContainer from '~/components/ui/Form.astro';
+import Form from '~/components/ui/Form.astro';
 import Headline from '~/components/ui/Headline.astro';
 import WidgetWrapper from '~/components/ui/WidgetWrapper.astro';
+import CompletedAnimation from '~/components/ui/CompletedAnimation.astro';
 import type { Contact as Props } from '~/types';
 
 const {
@@ -13,7 +14,9 @@ const {
   disclaimer,
   button,
   description,
-
+  accessKey,
+  successMessage = 'Thank you for your message! We will be in touch as soon as possible, usually within 24 hours.',
+  errorMessage = 'Oops! Something went wrong. Please try again later.',
   id,
   isDark = false,
   classes = {},
@@ -26,16 +29,218 @@ const {
   {
     inputs && (
       <div class="flex flex-col max-w-xl mx-auto rounded-lg backdrop-blur border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 shadow p-4 sm:p-6 lg:p-8 w-full">
-        <FormContainer
-          action="https://api.web3forms.com/submit"
-          method="POST"
-          inputs={inputs}
-          textarea={textarea}
-          disclaimer={disclaimer}
-          button={button}
-          description={description}
-        />
+        <div id="contact-form-wrapper" class="w-full" data-access-key={accessKey} data-error-message={errorMessage}>
+          <div class="form-stack grid">
+            <div id="form-active" class="form-panel form-panel-visible">
+              <Form
+                action="https://api.web3forms.com/submit"
+                method="POST"
+                inputs={inputs}
+                textarea={textarea}
+                disclaimer={disclaimer}
+                button={button}
+                description={description}
+              />
+            </div>
+
+            <div
+              id="form-success"
+              class="form-panel form-panel-hidden flex flex-col items-center justify-center text-center py-8"
+              aria-hidden="true"
+            >
+              <div class="flex justify-center w-full">
+                <CompletedAnimation size="10rem" color={isDark ? '#4ade80' : '#22c55e'} class="mx-auto" />
+              </div>
+              <h1 class="mt-6 text-2xl font-bold text-gray-900 dark:text-gray-100">Form submitted</h1>
+              <p class="mt-6 text-lg font-medium text-gray-800 dark:text-gray-200">{successMessage}</p>
+            </div>
+          </div>
+
+          <div id="form-error" class="hidden mt-4 text-red-600 dark:text-red-400 text-center font-medium">
+            {errorMessage}
+          </div>
+        </div>
       </div>
     )
   }
 </WidgetWrapper>
+
+<script>
+  const initContactForm = () => {
+    const wrapper = document.getElementById('contact-form-wrapper');
+    if (!wrapper) return;
+
+    const accessKey = wrapper.dataset.accessKey;
+    const errorMessage = wrapper.dataset.errorMessage;
+    const form = wrapper.querySelector('form');
+    const formActive = document.getElementById('form-active');
+    const formSuccess = document.getElementById('form-success');
+    const formError = document.getElementById('form-error');
+    const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+    const successAnimEl = formSuccess?.querySelector<HTMLElement>('.completed-animation-container');
+
+    if (!form || !accessKey) {
+      console.warn('Contact form: Missing form element or accessKey');
+      return;
+    }
+
+    // Inject Web3Forms access_key
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = 'access_key';
+    hiddenInput.value = accessKey;
+    form.appendChild(hiddenInput);
+
+    const showPanel = (el: HTMLElement | null) => {
+      if (!el) return;
+      el.classList.remove('form-panel-hidden');
+      el.classList.add('form-panel-visible');
+      el.setAttribute('aria-hidden', 'false');
+    };
+
+    const hidePanel = (el: HTMLElement | null) => {
+      if (!el) return;
+      el.classList.add('form-panel-hidden');
+      el.classList.remove('form-panel-visible');
+      el.setAttribute('aria-hidden', 'true');
+    };
+
+    // Restart the checkmark animation from frame 0 every time it's revealed.
+    // Removing .is-playing strips its `animation` entirely (back to the
+    // static resting state); forcing a reflow before re-adding it makes
+    // the browser start a fresh animation instance rather than resuming
+    // one that already finished.
+    const playSuccessAnimation = () => {
+      if (!successAnimEl) return;
+      successAnimEl.classList.remove('is-playing');
+      void successAnimEl.offsetWidth;
+      successAnimEl.classList.add('is-playing');
+    };
+
+    const revealSuccess = () => {
+      hidePanel(formActive);
+      showPanel(formSuccess);
+      playSuccessAnimation();
+    };
+
+    /*
+    const revealForm = () => {
+      showPanel(formActive);
+      hidePanel(formSuccess);
+    };
+
+    // Debug animation play
+    // mouseenter/mouseleave (not mouseover/mouseout) so this only fires
+    // on actually entering/leaving the wrapper, not on every crossing
+    // between child elements (inputs, button, etc.) inside it.
+    wrapper.addEventListener('mouseenter', () => {
+      revealSuccess();
+      form.reset();
+    });
+
+    wrapper.addEventListener('mouseleave', () => {
+      revealForm();
+      form.reset();
+    });
+    */
+
+    // Handle form submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Loading state
+      const originalBtnText = submitBtn?.textContent || 'Submit';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending...';
+        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      }
+      formError?.classList.add('hidden');
+
+      try {
+        const formData = new FormData(form);
+        const object = Object.fromEntries(formData);
+        const json = JSON.stringify(object);
+
+        const response = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: json,
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          revealSuccess();
+          form.reset();
+        } else {
+          formError?.classList.remove('hidden');
+          if (formError) {
+            formError.textContent = result.message || errorMessage;
+          }
+        }
+      } catch (error) {
+        console.error('Form submission error:', error);
+        formError?.classList.remove('hidden');
+      } finally {
+        // Restore button
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalBtnText;
+          submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+      }
+    });
+  };
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initContactForm);
+  } else {
+    initContactForm();
+  }
+</script>
+
+<style>
+  /*
+    Stack form-active and form-success in the same grid cell so the
+    wrapper's height is always the max of the two, instead of collapsing
+    to whichever one happens to be visible.
+  */
+  .form-stack {
+    display: grid;
+  }
+
+  .form-stack > .form-panel {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .form-panel-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .form-panel-visible {
+    opacity: 1;
+  }
+
+  /* Static, not tied to hidden/visible state: success must always paint
+     above the form whenever they overlap during the fade. Only the form
+     fades out; the success panel switches instantly so its own
+     checkmark animation is what the person sees "play". */
+  #form-active {
+    position: relative;
+    z-index: 1;
+    transition: opacity 300ms ease-out;
+  }
+
+  #form-success {
+    position: relative;
+    z-index: 2;
+  }
+</style>
