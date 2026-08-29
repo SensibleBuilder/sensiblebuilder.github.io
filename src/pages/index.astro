@@ -4,7 +4,7 @@ import Layout from '~/layouts/PageLayout.astro';
 import AtroposComponent from '~/components/ui/AtroposComponent.svelte';
 import Carousel from '~/components/widgets/Carousel.svelte';
 
-import ContactUs from '~/components/widgets/Contact.astro';
+import Contact from '~/components/widgets/Contact.astro';
 import Hero2 from '~/components/widgets/Hero2.astro';
 import Masonry from '~/components/ui/Masonry.astro';
 import Note from '~/components/widgets/Note.astro';
@@ -90,7 +90,8 @@ const masonryImages = [
   </Hero2>
 
   <Note
-    description="We operate in the Greater Seattle WA area, including Medina, Clyde Hill, Bellevue, Bothell and more."
+    title="Go Seattle!"
+    description="We operate in the Greater Seattle WA area, including Medina, Clyde Hill, Bellevue, Bothell and Seattle proper."
   />
 
   <WidgetWrapper id="gallery" containerClass="relative inline-block max-w-full">
@@ -102,7 +103,7 @@ const masonryImages = [
         <span class="js-title-keyword">Reality</span>
       </h2>
       <p class="mt-2 md:mt-3 mx-auto text-xl text-gray-500 dark:text-slate-400 font-medium">
-        Our services cover everything from custom homes to remodels and additions.
+        We take on both commercial and personal projects as a leading PNW contractor. See for yourself!
       </p>
     </header>
 
@@ -149,46 +150,39 @@ const masonryImages = [
   </WidgetWrapper>
 
   <Steps2
-    title="Our <span class='js-title-keyword'>values</span>"
-    subtitle="As homeowners, we understand that contracting is a huge and potentially frustrating endeavor. That is why we work closely with our clients to ensure that homes are designed with the utmost care."
+    title="Why <span class='js-title-keyword'>us</span>?"
+    subtitle="As homeowners, we understand that contracting is a huge and potentially frustrating endeavor. That's why we work closely with our clients to ensure that you always know the how, when, and why of each part of the process."
     items={[
       {
-        title: 'Customer-centric Process',
+        title: 'Customer-centric Leadership',
         description:
-          'We pride ourselves on communication, fast response times, and in-depth discussions to keep you in the loop. Letting your voice be heard is our top priority.',
+          'We pride ourselves on communication, communication, and more communication. Letting your voice be heard is our top priority.',
         icon: 'tabler:users',
       },
       {
         title: 'Holistic Design',
         description:
-          'Our approach to designing houses takes into consideration a wide variety of factors, from eco-friendliness and material efficiency to interior and psychological design.',
+          'We design houses with a wide variety of factors, from eco-friendliness and material efficiency to interior and psychological design.',
         icon: 'tabler:home',
       },
       {
         title: 'Passion',
         description:
-          'Every project we take is more than just a house to us. We know how important homes are to everyone, whether for yourself or for your family.',
+          'We know how important homes are to everyone, whether for yourself or for your family. Every house deserves our greatest effort.',
         icon: 'tabler:heart',
       },
     ]}
     id="about"
   />
-  <ContactUs
+  <Contact
     id="contact"
     title="Contact Us"
     subtitle="Drop us a message today and we'll get you started!"
     button="Submit"
+    accessKey="04d0e42b-42d9-4d7e-9c1b-a536b8744bfc" 
+    successMessage="Thanks for reaching out! We'll be in touch within 24 hours."
+    errorMessage="Oops! Something went wrong. Please try again later."
     inputs={[
-      {
-        type: 'hidden',
-        name: 'access_key',
-        value: '04d0e42b-42d9-4d7e-9c1b-a536b8744bfc', // jerry@sensiblebuilder.com
-      },
-      {
-        type: 'hidden',
-        name: 'redirect',
-        value: 'https://sensiblebuilder.com/#contact',
-      },
       {
         type: 'text',
         name: 'name',
