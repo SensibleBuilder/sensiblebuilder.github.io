@@ -45,6 +45,110 @@ const breakpointColsString =
     display: flex;
     width: auto;
   }
+
+  .sb-masonry-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background-color: rgba(15, 23, 42, 0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    pointer-events: auto;
+    transition:
+      background-color 0.28s ease,
+      backdrop-filter 0.28s ease,
+      -webkit-backdrop-filter 0.28s ease;
+  }
+
+  .sb-masonry-fullscreen.is-open {
+    background-color: rgba(15, 23, 42, 0.82);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .sb-masonry-fullscreen.is-closing {
+    background-color: rgba(15, 23, 42, 0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+
+  .sb-masonry-fullscreen-image {
+    position: fixed;
+    display: block;
+    object-fit: contain;
+    border-radius: 1rem;
+    box-shadow: 0 30px 90px rgba(15, 23, 42, 0.5);
+    background: #0f172a;
+    transition:
+      left 0.42s cubic-bezier(0.2, 0.8, 0.2, 1),
+      top 0.42s cubic-bezier(0.2, 0.8, 0.2, 1),
+      width 0.42s cubic-bezier(0.2, 0.8, 0.2, 1),
+      height 0.42s cubic-bezier(0.2, 0.8, 0.2, 1),
+      border-radius 0.42s cubic-bezier(0.2, 0.8, 0.2, 1),
+      transform 0.18s ease;
+    will-change: left, top, width, height, transform;
+    transform: translate3d(0, 0, 0) scale(1);
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    cursor: grab;
+  }
+
+  .sb-masonry-fullscreen-image:active {
+    cursor: grabbing;
+  }
+
+  .sb-masonry-fullscreen-controls {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.28);
+  }
+
+  .sb-masonry-fullscreen-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+
+  .sb-masonry-fullscreen-button:hover {
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .sb-masonry-fullscreen-button:active {
+    transform: translateY(1px);
+  }
+
+  body.sb-no-scroll {
+    overflow: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sb-masonry-fullscreen-image,
+    .sb-masonry-fullscreen-button {
+      transition: none;
+    }
+  }
 </style>
 
 <div
@@ -60,6 +164,276 @@ const breakpointColsString =
 
 <script>
   let initialized = false;
+
+  const getTargetFullscreenSize = (image: HTMLImageElement) => {
+    const naturalWidth = image.naturalWidth || image.width || image.clientWidth || window.innerWidth;
+    const naturalHeight = image.naturalHeight || image.height || image.clientHeight || window.innerHeight;
+    const aspectRatio = naturalWidth / Math.max(naturalHeight, 1);
+
+    const maxWidth = window.innerWidth * 0.86;
+    const maxHeight = window.innerHeight * 0.86;
+
+    let targetWidth = maxWidth;
+    let targetHeight = targetWidth / Math.max(aspectRatio, 0.01);
+
+    if (targetHeight > maxHeight) {
+      targetHeight = maxHeight;
+      targetWidth = targetHeight * aspectRatio;
+    }
+
+    return {
+      width: Math.min(targetWidth, window.innerWidth * 0.9),
+      height: Math.min(targetHeight, window.innerHeight * 0.9),
+    };
+  };
+
+  const clampPan = (value: number, size: number, zoom: number) => {
+    const maxPan = (size * (zoom - 1)) / 2;
+    return Math.min(Math.max(value, -maxPan), maxPan);
+  };
+
+  const closeFullscreenCard = () => {
+    const activeOverlay = document.querySelector('.sb-masonry-fullscreen');
+    if (!(activeOverlay instanceof HTMLElement)) {
+      return;
+    }
+
+    const activeImage = activeOverlay.querySelector('.sb-masonry-fullscreen-image') as HTMLImageElement | null;
+    const sourceRect = activeOverlay.dataset.sourceRect ? JSON.parse(activeOverlay.dataset.sourceRect) : null;
+
+    activeOverlay.classList.remove('is-open');
+    activeOverlay.classList.add('is-closing');
+
+    if (activeImage && sourceRect) {
+      const currentLeft = parseFloat(activeImage.style.left || '0');
+      const currentTop = parseFloat(activeImage.style.top || '0');
+      const currentWidth = parseFloat(activeImage.style.width || '0');
+      const currentHeight = parseFloat(activeImage.style.height || '0');
+
+      activeImage.style.left = `${currentLeft}px`;
+      activeImage.style.top = `${currentTop}px`;
+      activeImage.style.width = `${currentWidth}px`;
+      activeImage.style.height = `${currentHeight}px`;
+      activeImage.style.transform = activeImage.style.transform || 'translate3d(0, 0, 0) scale(1)';
+      activeImage.style.borderRadius = '1rem';
+
+      requestAnimationFrame(() => {
+        activeImage.style.left = `${sourceRect.left}px`;
+        activeImage.style.top = `${sourceRect.top}px`;
+        activeImage.style.width = `${sourceRect.width}px`;
+        activeImage.style.height = `${sourceRect.height}px`;
+        activeImage.style.borderRadius = '0.5rem';
+        activeImage.style.transform = 'translate3d(0, 0, 0) scale(1)';
+      });
+    }
+
+    document.body.classList.remove('sb-no-scroll');
+    document.querySelectorAll('[data-fullscreen-toggle]').forEach((card) => {
+      if (card instanceof HTMLElement) {
+        card.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    window.setTimeout(() => {
+      activeOverlay.remove();
+    }, 280);
+  };
+
+  const buildFullscreenControls = () => {
+    const controls = document.createElement('div');
+    controls.className = 'sb-masonry-fullscreen-controls';
+    controls.innerHTML = `
+      <button class="sb-masonry-fullscreen-button" type="button" data-zoom-out aria-label="Zoom out">−</button>
+      <button class="sb-masonry-fullscreen-button" type="button" data-zoom-in aria-label="Zoom in">+</button>
+      <button class="sb-masonry-fullscreen-button" type="button" data-reset aria-label="Reset view">↺</button>
+      <button class="sb-masonry-fullscreen-button" type="button" data-close aria-label="Close image">×</button>
+    `;
+    return controls;
+  };
+
+  const attachFullscreenControls = (overlay: HTMLElement, image: HTMLImageElement) => {
+    const controls = buildFullscreenControls();
+    overlay.appendChild(controls);
+
+    let zoom = 1;
+    let panX = 0;
+    let panY = 0;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let pointerMoved = false;
+    let pointerDown = false;
+
+    const applyTransform = () => {
+      const width = image.clientWidth || parseFloat(image.style.width || '0');
+      const height = image.clientHeight || parseFloat(image.style.height || '0');
+      panX = clampPan(panX, width, zoom);
+      panY = clampPan(panY, height, zoom);
+      image.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+    };
+
+    const setZoom = (nextZoom: number) => {
+      zoom = Math.min(3, Math.max(1, nextZoom));
+      if (zoom === 1) {
+        panX = 0;
+        panY = 0;
+      }
+      applyTransform();
+    };
+
+    controls.querySelector('[data-zoom-in]')?.addEventListener('click', () => setZoom(zoom + 0.25));
+    controls.querySelector('[data-zoom-out]')?.addEventListener('click', () => setZoom(zoom - 0.25));
+    controls.querySelector('[data-reset]')?.addEventListener('click', () => {
+      zoom = 1;
+      panX = 0;
+      panY = 0;
+      applyTransform();
+    });
+    controls.querySelector('[data-close]')?.addEventListener('click', () => closeFullscreenCard());
+
+    image.addEventListener('contextmenu', (event) => event.preventDefault());
+    image.addEventListener('dragstart', (event) => event.preventDefault());
+
+    image.addEventListener('pointerdown', (event) => {
+      pointerDown = true;
+      pointerMoved = false;
+      dragStartX = event.clientX;
+      dragStartY = event.clientY;
+      image.setPointerCapture(event.pointerId);
+    });
+
+    image.addEventListener('pointermove', (event) => {
+      if (!pointerDown) {
+        return;
+      }
+
+      const movedX = event.clientX - dragStartX;
+      const movedY = event.clientY - dragStartY;
+      if (Math.abs(movedX) > 4 || Math.abs(movedY) > 4) {
+        pointerMoved = true;
+      }
+
+      if (zoom > 1) {
+        panX = clampPan(panX + movedX, image.clientWidth || parseFloat(image.style.width || '0'), zoom);
+        panY = clampPan(panY + movedY, image.clientHeight || parseFloat(image.style.height || '0'), zoom);
+        dragStartX = event.clientX;
+        dragStartY = event.clientY;
+        applyTransform();
+      }
+    });
+
+    image.addEventListener('pointerup', (event) => {
+      if (!pointerMoved && pointerDown) {
+        closeFullscreenCard();
+      }
+      pointerDown = false;
+      pointerMoved = false;
+      image.releasePointerCapture(event.pointerId);
+    });
+
+    image.addEventListener('pointerleave', () => {
+      pointerDown = false;
+      pointerMoved = false;
+    });
+
+    overlay.addEventListener(
+      'wheel',
+      (event) => {
+        event.preventDefault();
+        const nextZoom = zoom + (event.deltaY > 0 ? -0.15 : 0.15);
+        setZoom(nextZoom);
+      },
+      { passive: false }
+    );
+
+    controls.addEventListener('click', (event) => {
+      event.stopPropagation();
+    });
+  };
+
+  const toggleFullscreenCard = (card: HTMLElement) => {
+    const existingOverlay = document.querySelector('.sb-masonry-fullscreen');
+    if (existingOverlay) {
+      closeFullscreenCard();
+      return;
+    }
+
+    const image = card.querySelector('img, picture img');
+    if (!(image instanceof HTMLImageElement)) {
+      return;
+    }
+
+    const sourceRect = image.getBoundingClientRect();
+    const { width: finalWidth, height: finalHeight } = getTargetFullscreenSize(image);
+    const finalLeft = (window.innerWidth - finalWidth) / 2;
+    const finalTop = (window.innerHeight - finalHeight) / 2;
+
+    const clone = image.cloneNode(true) as HTMLImageElement;
+    clone.className = 'sb-masonry-fullscreen-image';
+    clone.style.left = `${sourceRect.left}px`;
+    clone.style.top = `${sourceRect.top}px`;
+    clone.style.width = `${sourceRect.width}px`;
+    clone.style.height = `${sourceRect.height}px`;
+    clone.style.transform = 'translate3d(0, 0, 0) scale(1)';
+    clone.alt = image.alt || 'Expanded gallery image';
+    clone.draggable = false;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'sb-masonry-fullscreen';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', image.alt || 'Expanded image');
+    overlay.dataset.sourceRect = JSON.stringify({
+      left: sourceRect.left,
+      top: sourceRect.top,
+      width: sourceRect.width,
+      height: sourceRect.height,
+    });
+    overlay.appendChild(clone);
+
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay) {
+        closeFullscreenCard();
+      }
+    });
+
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => {
+      overlay.classList.add('is-open');
+      clone.style.left = `${finalLeft}px`;
+      clone.style.top = `${finalTop}px`;
+      clone.style.width = `${finalWidth}px`;
+      clone.style.height = `${finalHeight}px`;
+      clone.style.borderRadius = '1rem';
+      window.setTimeout(() => {
+        document.body.classList.add('sb-no-scroll');
+      }, 20);
+      attachFullscreenControls(overlay, clone);
+    });
+
+    card.setAttribute('aria-expanded', 'true');
+  };
+
+  const bindFullscreenCards = () => {
+    document.querySelectorAll('[data-fullscreen-toggle]').forEach((card) => {
+      if (!(card instanceof HTMLElement) || card.dataset.fullscreenBound === 'true') {
+        return;
+      }
+
+      card.dataset.fullscreenBound = 'true';
+      card.dataset.fullscreenSource = card.querySelector('img')?.getAttribute('src') ?? '';
+
+      card.addEventListener('click', () => {
+        toggleFullscreenCard(card);
+      });
+
+      card.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          toggleFullscreenCard(card);
+        }
+      });
+    });
+  };
 
   const initMasonry = () => {
     console.log('Initializing masonry.');
@@ -77,6 +451,8 @@ const breakpointColsString =
       const throttledInitialize = throttle(initializeMasonry, 200);
       throttledInitialize();
     }
+
+    bindFullscreenCards();
   };
 
   const hasAstroViewTransitions = () => {
@@ -84,6 +460,17 @@ const breakpointColsString =
     const metaTag = document.querySelector('meta[name="astro-view-transitions-enabled"]');
     return metaTag && metaTag.getAttribute('content') === 'true';
   };
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') {
+      return;
+    }
+
+    const activeOverlay = document.querySelector('.sb-masonry-fullscreen');
+    if (activeOverlay) {
+      closeFullscreenCard();
+    }
+  });
 
   if (hasAstroViewTransitions()) {
     document.addEventListener('astro:page-load', initMasonry);

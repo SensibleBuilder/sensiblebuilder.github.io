@@ -134,7 +134,15 @@ const masonryImages = [
     >
       {
         masonryImages.map((item, index) => (
-          <figure class:list={['sb-masonry-card', `sb-span-${item.span}`]} data-speed={item.speed}>
+          <figure
+            class:list={['sb-masonry-card', `sb-span-${item.span}`]}
+            data-speed={item.speed}
+            data-fullscreen-toggle
+            tabindex="0"
+            role="button"
+            aria-label={`Open ${item.alt} in full screen`}
+            aria-expanded="false"
+          >
             <Image
               src={item.src}
               alt={item.alt}
@@ -154,7 +162,7 @@ const masonryImages = [
     subtitle="As homeowners, we understand that contracting is a huge and potentially frustrating endeavor. That's why we work closely with our clients to ensure that you always know the how, when, and why of each part of the process."
     items={[
       {
-        title: 'Customer-centric Leadership',
+        title: 'Customers First',
         description:
           'We pride ourselves on communication, communication, and more communication. Letting your voice be heard is our top priority.',
         icon: 'tabler:users',
